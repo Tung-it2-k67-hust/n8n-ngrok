@@ -1,0 +1,377 @@
+{
+  "file": "Lesson 1 Kotlin basics.pdf",
+  "total_pages": 59,
+  "analysis_merged": [
+    {
+      "title": "Bài 1: Kotlin Basics - Tổng quan và Bắt đầu",
+      "summary": "Phần này giới thiệu về bài học Kotlin basics, bao gồm các chủ đề chính sẽ được học: Operator, Data types, Variables, Conditionals, Lists and arrays, Null safety. Hướng dẫn các bước cơ bản để bắt đầu: Mở IntelliJ IDEA, tạo project mới, đặt tên project, mở REPL (Read-Eval-Print-Loop) và tạo một hàm printHello() để kiểm tra.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "printHello()",
+          "explanation": "Hàm mẫu được tạo ra để kiểm tra môi trường. Người dùng được hướng dẫn nhấn Control+Enter (hoặc Command+Enter trên Mac) để thực thi mã trong REPL."
+        }
+      ]
+    },
+    {
+      "title": "Bài 1: Operators (Toán tử)",
+      "summary": "Phần này liệt kê và phân loại các toán tử cơ bản trong Kotlin.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "+ - * / % ++ -- < <= > >= = == !=",
+          "explanation": "Giải thích các loại toán tử: Toán tử toán học (+ - * / %), toán tử tăng/giảm (++ --), toán tử so sánh (< <= > >=), toán tử gán (=), và toán tử bằng nhau/khác nhau (== !=)."
+        }
+      ]
+    },
+    {
+      "title": "Phép toán số nguyên và số thực",
+      "summary": "Phần này giới thiệu các phép toán toán học cơ bản (cộng, trừ, nhân, chia, lấy dư) trong Kotlin cho cả số nguyên (Integers) và số thực (Doubles). Nó cho thấy kết quả đầu ra trực tiếp của các biểu thức toán học.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "1 + 1 // 2\n53 - 3 // 50\n50 / 10 // 5\n9 % 3 // 0",
+          "explanation": "Minh họa các phép toán cộng, trừ, chia lấy nguyên và chia lấy dư trên số nguyên, cho ra kết quả là số nguyên."
+        },
+        {
+          "language": "Kotlin",
+          "code": "1.0 / 2.0 // 0.5\n2.0 * 3.5 // 7.0",
+          "explanation": "Minh họa các phép toán chia và nhân trên số thực (Doubles), cho ra kết quả là số thực."
+        }
+      ]
+    },
+    {
+      "title": "Kiểu dữ liệu kết quả và phương thức toán tử",
+      "summary": "Giải thích rằng Kotlin ghi nhận kiểu dữ liệu (Int, Double) cho kết quả phép toán. Ngoài ra, Kotlin cho phép gọi các phương thức toán tử (như .times(), .plus()) như thể số là các đối tượng.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "1+1 // kotlin.Int = 2\n1.0/2.0 // kotlin.Double = 0.5",
+          "explanation": "Minh họa việc Kotlin tự động gán kiểu dữ liệu cụ thể cho kết quả của biểu thức dựa trên toán hạng."
+        },
+        {
+          "language": "Kotlin",
+          "code": "2.times(3) // 6\n3.5.plus(4) // 7.5\n2.4.div(2) // 1.2",
+          "explanation": "Cho thấy cách sử dụng phương thức (function call) thay vì ký hiệu toán tử (operator) để thực hiện các phép tính, kết quả tương đương."
+        }
+      ]
+    },
+    {
+      "title": "Các kiểu dữ liệu số và Boolean",
+      "summary": "Liệt kê các kiểu dữ liệu cơ bản trong Kotlin: số nguyên (Long, Int, Short, Byte), số thực (Double, Float), ký tự (Char) và Boolean. Bảng dữ liệu cho biết số bit và phạm vi giá trị của từng kiểu.",
+      "code_blocks": []
+    },
+    {
+      "title": "Tính chất toán hạng và Type Mismatch",
+      "summary": "Khẳng định rằng kiểu dữ liệu của kết quả phép toán thường phụ thuộc vào kiểu dữ liệu của các toán hạng nhập vào. Nếu chia hai số nguyên, kết quả sẽ là số nguyên (dù lỗi số học chia lẻ có thể xảy ra).",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "6 * 50   // kotlin.Int = 300\n1 / 2    // kotlin.Int = 0 (chia số nguyên)\n6.0 * 50 // kotlin.Double = 300.0",
+          "explanation": "Minh họa rằng kết quả giữ nguyên kiểu của toán hạng. Phép chia 1/2 cho 0 vì cả hai đều là Int. Phép nhân 6.0*50 cho Double vì có một toán hạng là Double."
+        }
+      ]
+    },
+    {
+      "title": "Ép kiểu (Type Casting)",
+      "summary": "Giải thích quy tắc ép kiểu an toàn giữa các kiểu số. Kotlin không cho phép gán trực tiếp Int vào Byte mà không có sự chuyển đổi rõ ràng.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val i: Int = 6\nval b: Byte = i // Lỗi\nval b2: Byte = i.toByte() // Hợp lệ",
+          "explanation": "Minh họa cách xử lý lỗi type mismatch bằng cách sử dụng hàm chuyển đổi .toByte() để ép kiểu thủ công."
+        }
+      ]
+    },
+    {
+      "title": "Đọc số dài với dấu gạch dưới",
+      "summary": "Giới thiệu tính năng sử dụng dấu gạch dưới (_) để phân tách các chữ số trong các hằng số số học dài, giúp提高tính dễ đọc của mã nguồn.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val oneMillion = 1_000_000\nval idNumber = 999_99_9999L\nval hexBytes = 0xFF_EC_DE_5E\nval bytes = 0b11010010_01101001_10010100_10010010",
+          "explanation": "Các ví dụ về sử dụng dấu gạch dưới trong số thập phân, số dài (Long), số thập lục phân và số nhị phân."
+        }
+      ]
+    },
+    {
+      "title": "Strings in Kotlin",
+      "summary": "This section defines strings as sequences of characters enclosed in double quotes. It covers basic string literals, the use of escape characters (e.g., \\n), and multi-line strings using triple quotes (\"\"\"). It also introduces string concatenation using the '+' operator and mentions the presence of variable interpolation (though detailed templates are in the next section).",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val s1 = \"Hello world!\"\nval s2 = \"Hello world!\\n\"\nval text = \"\"\"\nvar bikes = 50\n\"\"\"",
+          "explanation": "Demonstrates creating a basic string, a string with an escape character, and a multi-line string using triple quotes."
+        },
+        {
+          "language": "Kotlin",
+          "code": "val numberOfDogs = 3\nval numberOfCats = 2\n\"I have $numberOfDogs dogs\" + \" and $numberOfCats cats\"",
+          "explanation": "Shows string concatenation and the usage of simple string templates (variables prefixed with $) within the concatenation process."
+        }
+      ]
+    },
+    {
+      "title": "String Templates",
+      "summary": "This section explains String Templates in detail. A template expression starts with a dollar sign ($). It can be a simple variable reference ($variable) or an arbitrary expression inside curly braces (${expression}). This allows for embedding values and calculations directly into string literals.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val i = 10\nprintln(\"i = $i\")",
+          "explanation": "Demonstrates a simple string template using a variable reference."
+        },
+        {
+          "language": "Kotlin",
+          "code": "val s = \"abc\"\nprintln(\"$s.length is ${s.length}\")",
+          "explanation": "Demonstrates using a simple variable ($s) and an expression inside curly braces (${s.length}) to calculate and display the string length."
+        },
+        {
+          "language": "Kotlin",
+          "code": "val numberOfShirts = 10\nval numberOfPants = 5\n\"I have ${numberOfShirts + numberOfPants} items of clothing\"",
+          "explanation": "Shows a template expression performing arithmetic directly within the string literal."
+        }
+      ]
+    },
+    {
+      "title": "Variables and Type Inference",
+      "summary": "This section introduces variables in Kotlin, highlighting that it is a statically-typed language where types are resolved at compile time. It emphasizes 'Powerful type inference,' allowing the compiler to determine the type automatically based on the assigned value, though explicit type declaration is also supported.",
+      "code_blocks": []
+    },
+    {
+      "title": "Specifying Variable Types",
+      "summary": "This section details how to explicitly declare a variable's type using colon notation (variableName: Type). It provides examples for Integers and Doubles. Crucially, it notes that once a type is assigned (either explicitly or via inference), it cannot be changed later.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "var width: Int = 12\nvar length: Double = 2.5",
+          "explanation": "Demonstrates explicit type declaration for integer and double variables using colon notation."
+        }
+      ]
+    },
+    {
+      "title": "Mutable vs. Immutable Variables",
+      "summary": "This section distinguishes between mutable and immutable variables. Mutable variables are declared with 'var' and can be reassigned. Immutable variables are declared with 'val' (similar to 'final' in Java) and cannot be reassigned after initialization. The text recommends using immutable variables ('val') whenever possible.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "var score = 10\nval name = \"Jennifer\"",
+          "explanation": "Contrasts the declaration of a mutable variable ('score') and an immutable variable ('name')."
+        },
+        {
+          "language": "Kotlin",
+          "code": "var count = 1\ncount = 2\nval size = 1\nsize = 2",
+          "explanation": "Illustrates valid reassignment for 'var' and the compiler error that occurs when attempting to reassign a 'val'."
+        }
+      ]
+    },
+    {
+      "title": "Conditionals",
+      "summary": "This section introduces the topic of Conditionals. No specific syntax or logic is provided in the visible text other than the heading.",
+      "code_blocks": []
+    },
+    {
+      "title": "Control Flow Overview",
+      "summary": "This section introduces the fundamental control flow structures available in Kotlin for conditional logic and iteration.",
+      "code_blocks": []
+    },
+    {
+      "title": "If/Else Statements",
+      "summary": "Demonstrates the basic syntax for if/else conditional blocks in Kotlin.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val numberOfCups = 30\nval numberOfPlates = 50\nif (numberOfCups > numberOfPlates) {\n    println(\"Too many cups!\")\n} else {\n    println(\"Not enough cups!\")\n}",
+          "explanation": "Compares two values and executes the block corresponding to the true condition. In this case, 30 is not greater than 50, so the else block runs."
+        }
+      ]
+    },
+    {
+      "title": "If Statement with Multiple Cases",
+      "summary": "Shows how to chain conditions using else if to handle multiple specific scenarios.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val guests = 30\nif (guests == 0) {\n    println(\"No guests\")\n} else if (guests < 20) {\n    println(\"Small group of people\")\n} else {\n    println(\"Large group of people!\")\n}",
+          "explanation": "Evaluates 'guests' against zero, then a range below 20. Since 30 is greater than 20, the final else block is executed."
+        }
+      ]
+    },
+    {
+      "title": "Ranges",
+      "summary": "Defines Ranges as data types representing a span of comparable values (inclusive), which can contain mutable or immutable objects.",
+      "code_blocks": []
+    },
+    {
+      "title": "Ranges in If/Else Statements",
+      "summary": "Illustrates the 'in' operator to check if a value falls within a specific range.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val numberOfStudents = 50\nif (numberOfStudents in 1..100) {\n    println(numberOfStudents)\n}",
+          "explanation": "Checks if the variable 'numberOfStudents' is within the inclusive range of 1 to 100. The note emphasizes no spaces around the '..' operator."
+        }
+      ]
+    },
+    {
+      "title": "When Statement",
+      "summary": "Introduces the 'when' statement as a powerful alternative to if/else chains, capable of matching values or ranges, and mentions its use as an expression returning a value.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "when (results) {\n    0 -> println(\"No results\")\n    in 1..39 -> println(\"Got results!\")\n    else -> println(\"That's a lot of results!\")\n}",
+          "explanation": "Evaluates the 'results' variable. It handles specific values (0) and ranges ('in 1..39'). If 'results' is outside these, the 'else' branch executes."
+        }
+      ]
+    },
+    {
+      "title": "For Loops",
+      "summary": "Demonstrates iterating over collections using the 'for-in' loop without needing manual index management.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val pets = arrayOf(\"dog\", \"cat\", \"canary\")\nfor (element in pets) {\n    print(element + \" \")\n}",
+          "explanation": "Iterates over the 'pets' array and prints each element separated by a space."
+        }
+      ]
+    },
+    {
+      "title": "For Loops: Elements and Indexes",
+      "summary": "Shows how to iterate over a collection to access both the element and its index simultaneously using destructuring declarations.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "for ((index, element) in pets.withIndex()) {\n    println(\"Item at $index is $element\\n\")\n}",
+          "explanation": "Uses the '.withIndex()' function to get an IndexedValue object for each iteration, which is then destructured into 'index' and 'element' variables."
+        }
+      ]
+    },
+    {
+      "title": "For Loops: Step Sizes and Ranges",
+      "summary": "Covers iterating over ranges with specific directions and step sizes, including descending ranges and stepping by integers.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "for (i in 1..5) print(i)\nfor (i in 5 downTo 1) print(i)\nfor (i in 3..6 step 2) print(i)\nfor (i in 'd'..'g') print (i)",
+          "explanation": "Demonstrates various range iteration patterns: standard ascending (1..5), descending (downTo), stepping by 2 (step), and iterating over character ranges."
+        }
+      ]
+    },
+    {
+      "title": "While Loops",
+      "summary": "Demonstrates the 'while' loop (executes while condition is true) and the 'do-while' loop (executes at least once, then checks condition).",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "var bicycles = 0\nwhile (bicycles < 50) {\n    bicycles++\n}\nprintln(\"$bicycles bicycles in the bicycle rack\\n\")\ndo {\n    bicycles--\n} while (bicycles > 50)\nprintln(\"$bicycles bicycles in the bicycle rack\\n\")",
+          "explanation": "The first loop increments 'bicycles' until it reaches 50. The second loop (do-while) decrements 'bicycles' only once because the condition is false initially but checked after execution."
+        }
+      ]
+    },
+    {
+      "title": "Repeat Loops",
+      "summary": "Introduces the 'repeat' loop as a mechanism for executing a block of code a specific number of times. The example 'repeat(2)' demonstrates executing the print statement twice.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "repeat(2) {\nprint(\"Hello!\")\n}",
+          "explanation": "Executes the code block inside the braces exactly 2 times, printing 'Hello!' twice without a newline."
+        }
+      ]
+    },
+    {
+      "title": "Lists in Kotlin",
+      "summary": "Defines Kotlin Lists as ordered collections where elements can be accessed by index and can be duplicated. It highlights the analogy of a sentence where word order matters.",
+      "code_blocks": []
+    },
+    {
+      "title": "Immutable Lists",
+      "summary": "Demonstrates creating an immutable list using listOf(). Once created, the structure of the list (elements added/removed) cannot be changed.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val instruments = listOf(\"trumpet\", \"piano\", \"violin\")\nprintln(instruments)",
+          "explanation": "Creates a read-only list and prints it: [trumpet, piano, violin]"
+        }
+      ]
+    },
+    {
+      "title": "Mutable Lists",
+      "summary": "Covers mutable lists created with mutableListOf(), allowing modifications like adding or removing elements. Notes that even if the variable is declared with 'val', the contents can still be modified.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val myList = mutableListOf(\"trumpet\", \"piano\", \"violin\")\nmyList.remove(\"violin\")",
+          "explanation": "Creates a list that can be modified. The code removes the element 'violin' from the list."
+        }
+      ]
+    },
+    {
+      "title": "Arrays in Kotlin",
+      "summary": "Introduces Arrays as fixed-size collections storing multiple items. Elements are mutable, but the array size cannot change after initialization.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val pets = arrayOf(\"dog\", \"cat\", \"canary\")\nprintln(java.util.Arrays.toString(pets))",
+          "explanation": "Creates an array of strings and prints it using Java utility methods: [dog, cat, canary]"
+        }
+      ]
+    },
+    {
+      "title": "Array Types and Constructors",
+      "summary": "Explains that arrays can hold mixed types (using arrayOf) or specific primitive types (using specialized constructors like intArrayOf).",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val mix = arrayOf(\"hats\", 2)\nval numbers = intArrayOf(1, 2, 3)",
+          "explanation": "Demonstrates creating an array with mixed types (String, Int) and a strictly typed array of Integers."
+        }
+      ]
+    },
+    {
+      "title": "Combining Arrays",
+      "summary": "Shows how to concatenate two arrays into a new one using the + operator.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val numbers = intArrayOf(1,2,3)\nval numbers2 = intArrayOf(4,5,6)\nval combined = numbers2 + numbers\nprintln(Arrays.toString(combined))",
+          "explanation": "Combines two integer arrays. Output: [4, 5, 6, 1, 2, 3]"
+        }
+      ]
+    },
+    {
+      "title": "Null Safety in Kotlin",
+      "summary": "This section introduces Kotlin's null safety features, a core concept designed to eliminate null pointer exceptions. It explains that variables are non-nullable by default (e.g., `Int`), but can be made nullable using the safe call operator (`?`). It details the safe call operator (`?.`), the non-null assertion (`!!`), and the Elvis operator (`?:`) for handling null values. It concludes with a summary of Lesson 1, recapping Kotlin basics including data types, control flow, and lists.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "var numberOfBooks: Int = null",
+          "explanation": "This code attempts to assign null to a non-nullable Int variable, resulting in a compilation error. It illustrates Kotlin's default null safety."
+        },
+        {
+          "language": "Kotlin",
+          "code": "var numberOfBooks: Int? = null",
+          "explanation": "This code declares a nullable integer variable by appending a question mark to the type. It allows the variable to hold null values."
+        },
+        {
+          "language": "Kotlin",
+          "code": "var numberOfBooks = 6\nif (numberOfBooks != null) {\n    numberOfBooks = numberOfBooks.dec()\n}",
+          "explanation": "Standard null checking using an if statement to prevent NullPointerException before decrementing the variable."
+        },
+        {
+          "language": "Kotlin",
+          "code": "var numberOfBooks = 6\nnumberOfBooks = numberOfBooks?.dec()",
+          "explanation": "Using the safe call operator to decrement the variable. If numberOfBooks were null, the expression evaluates to null instead of crashing."
+        },
+        {
+          "language": "Kotlin",
+          "code": "val len = s!!.length",
+          "explanation": "Using the non-null assertion operator (!!) to forcibly cast 's' to a non-null type. This will throw a NullPointerException if 's' is null."
+        },
+        {
+          "language": "Kotlin",
+          "code": "numberOfBooks = numberOfBooks?.dec() ?: 0",
+          "explanation": "Using the Elvis operator (?:). If the expression on the left returns null, it defaults to 0."
+        }
+      ]
+    }
+  ]
+}

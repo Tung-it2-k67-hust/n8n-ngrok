@@ -1,0 +1,161 @@
+{
+  "file": "Lesson 11 Connect to the internet .pdf",
+  "total_pages": 37,
+  "analysis_merged": [
+    {
+      "title": "Android Permissions Overview",
+      "summary": "This section introduces the concept of Android permissions, explaining that they protect user privacy and are declared in the AndroidManifest.xml file. It details the protection levels (Normal, Signature, Dangerous) and when they are granted (Install time vs Runtime). Crucially, it highlights that 'Dangerous' permissions require a runtime request to the user, while 'Normal' permissions (like INTERNET) are granted automatically at installation. It provides code examples for adding permissions to the manifest and best practices for requesting dangerous permissions.",
+      "code_blocks": [
+        {
+          "language": "XML",
+          "code": "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\npackage=\"com.example.sampleapp\">\n<uses-permission android:name=\"android.permission.USE_BIOMETRIC\" />\n<application>\n<activity\nandroid:name=\".MainActivity\" ... >\n...\n</activity>\n</application>\n</manifest>",
+          "explanation": "Example of declaring a permission in the AndroidManifest.xml file using the <uses-permission> tag."
+        },
+        {
+          "language": "XML",
+          "code": "<uses-permission android:name=\"android.permission.INTERNET\" />\n<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />",
+          "explanation": "Specific manifest declarations required to allow the app to access the internet and check network connectivity status."
+        }
+      ]
+    },
+    {
+      "title": "App Permissions Best Practices",
+      "summary": "This section lists best practices for handling permissions, building on the previous explanation of permission types. Key lessons include: 1) Use only necessary permissions to respect user privacy. 2) Monitor permissions required by third-party libraries. 3) Be transparent with users about why permissions are needed. 4) Make system accesses explicit. This aligns with the previous emphasis on 'Dangerous' permissions requiring runtime requests.",
+      "code_blocks": []
+    },
+    {
+      "title": "Introduction to Retrofit",
+      "summary": "This section introduces Retrofit, a type-safe HTTP client for Android and Java. It explains that Retrofit converts a REST API into a Kotlin interface. It highlights its ability to parse response types (JSON, XML) into objects (POJOs) and its extensibility. This connects to the 'App permissions' section as networking is a common operation that may require the INTERNET permission (a 'Normal' permission).",
+      "code_blocks": []
+    },
+    {
+      "title": "Benefits of Retrofit",
+      "summary": "Explains why developers should choose Retrofit. It builds on OkHttp, providing features like HTTP/2, connection pooling, and response caching. It emphasizes that Retrofit abstracts away the boilerplate code required to make network requests, allowing developers to focus on business logic rather than low-level network configuration.",
+      "code_blocks": []
+    },
+    {
+      "title": "Gradle Dependencies for Retrofit",
+      "summary": "Lists the specific libraries required to implement Retrofit in a project. The code block shows how to add the Retrofit core library, a Converter factory (specifically Moshi for JSON parsing), and the Moshi libraries themselves. The 'kapt' configuration is used for annotation processing to generate code.",
+      "code_blocks": [
+        {
+          "language": "Gradle (Groovy/Kotlin DSL)",
+          "code": "implementation \"com.squareup.retrofit2:retrofit:2.9.0\"\nimplementation \"com.squareup.retrofit2:converter-moshi:2.9.0\"\nimplementation \"com.squareup.moshi:moshi:$moshi_version\"\nimplementation \"com.squareup.moshi:moshi-kotlin:$moshi_version\"\nkapt \"com.squareup.moshi:moshi-kotlin-codegen:$moshi_version\"",
+          "explanation": "This block adds Retrofit and Moshi dependencies to the build.gradle file. Retrofit handles the network client, while Moshi converts JSON responses into Kotlin objects."
+        }
+      ]
+    },
+    {
+      "title": "Web Service API Design",
+      "summary": "This section defines the structure of a hypothetical web service API that will be used as an example. It lists endpoints and their corresponding HTTP methods (GET, POST). This provides the context for the 'Define a Retrofit service' section, showing the mapping between URL paths and the requested actions.",
+      "code_blocks": []
+    },
+    {
+      "title": "Defining a Retrofit Service Interface",
+      "summary": "This section demonstrates how to define a Kotlin interface representing the API endpoints. It uses annotations to map function definitions to specific HTTP requests. This is the core of Retrofit's type-safety: defining the request structure (path parameters, query parameters, body) and the expected response type (e.g., List<Post>).",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "interface SimpleService {\n    @GET(\"posts\")\n    suspend fun listPosts(): List<Post>\n    @GET(\"posts/{userId}\")\n    suspend fun listByUser(@Path(\"userId\") userId:String): List<Post>\n    @GET(\"posts/search\") // becomes post/search?filter=query\n    suspend fun search(@Query(\"filter\") search: String): List<Post>\n    @POST(\"posts/new\")\n    suspend fun create(@Body post : Post): Post\n}",
+          "explanation": "Defines a Retrofit service interface using annotations to map HTTP methods to endpoints. It uses @Path for URL substitution, @Query for query parameters, and @Body for the POST payload. The 'suspend' modifier indicates these are coroutine-compatible functions."
+        }
+      ]
+    },
+    {
+      "title": "Instantiating Retrofit",
+      "summary": "This section shows the code required to build a Retrofit instance and create the service implementation. It uses the Builder pattern to set the base URL and the converter factory (needed to serialize/deserialize data).",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val retrofit = Retrofit.Builder()\n    .baseUrl(\"https://example.com\")\n    .addConverterFactory(...)\n    .build()\nval service = retrofit.create(SimpleService::class.java)",
+          "explanation": "Instantiates the Retrofit client with a base URL and a converter factory. It then creates a concrete implementation of the SimpleService interface, allowing the app to make network calls via function calls."
+        }
+      ]
+    },
+    {
+      "title": "Workflow and Dependencies Overview",
+      "summary": "This section introduces the end-to-end data flow involving Retrofit and introduces the concept of Converter.Factory to handle data transformation (like JSON or XML) between the HTTP response and Kotlin objects.",
+      "code_blocks": []
+    },
+    {
+      "title": "Moshi Library Introduction",
+      "summary": "Moshi is presented as a specific JSON library used to parse JSON into objects. It requires adding Gradle dependencies and configuring a builder to work with Retrofit.",
+      "code_blocks": []
+    },
+    {
+      "title": "Defining Data Models with Moshi",
+      "summary": "This section shows how to define a Kotlin data class representing the JSON structure. It highlights the use of the @JsonClass(generateAdapter = true) annotation to generate efficient adapters for Moshi.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "@JsonClass(generateAdapter = true)\ndata class Post (\nval title: String,\nval description: String,\nval url: String,\nval updated: String,\nval thumbnail: String,\nval closedCaptions: String?)",
+          "explanation": "Defines the Post data model matching the JSON structure. The annotation enables code generation for Moshi adapters, improving performance."
+        }
+      ]
+    },
+    {
+      "title": "Configuring Retrofit with Moshi",
+      "summary": "This block demonstrates the instantiation of the Moshi builder (including the KotlinJsonAdapterFactory for Kotlin reflection support) and the setup of the Retrofit instance using MoshiConverterFactory.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "private val moshi = Moshi.Builder()\n.add(KotlinJsonAdapterFactory())\n.build()\nval retrofit = Retrofit.Builder()\n.addConverterFactory(MoshiConverterFactory.create(moshi))\n.baseUrl(BASE_URL)\n.build()\nobject API {\nval retrofitService : SimpleService by lazy {\nretrofit.create(SimpleService::class.java)\n}\n}",
+          "explanation": "Initializes the Moshi converter and builds the Retrofit client. It creates a singleton API object with a lazy-initialized service interface."
+        }
+      ]
+    },
+    {
+      "title": "Performing Network Requests with Coroutines",
+      "summary": "Shows how to execute a network call using the Retrofit service within a ViewModel coroutine scope.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "viewModelScope.launch {\nLog.d(\"posts\", API.retrofitService.searchPosts(\"query\"))\n}",
+          "explanation": "Launches a background coroutine to perform a network request. This ensures the UI thread is not blocked while waiting for the server response."
+        }
+      ]
+    },
+    {
+      "title": "Image Loading with Glide",
+      "summary": "The section shifts to UI implementation, specifically displaying images. It introduces Glide as a high-performance third-party library for loading images (including GIFs) efficiently.",
+      "code_blocks": [
+        {
+          "language": "Gradle",
+          "code": "implementation \"com.github.bumptech.glide:glide:$glide_version\"",
+          "explanation": "Gradle dependency required to add the Glide library to the project."
+        }
+      ]
+    },
+    {
+      "title": "Basic Image Loading with Glide",
+      "summary": "This section provides the simplest code snippet for loading an image using Glide. It builds on the previous introduction of Glide (page 30-31) by showing the chained method calls: .with() to specify the context/fragment, .load() to define the source (URL), and .into() to display the image in the target View.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "Glide.with(fragment)\n    .load(url)\n    .into(imageView);",
+          "explanation": "The basic Glide chain to load an image from a URL into an ImageView."
+        }
+      ]
+    },
+    {
+      "title": "Customizing Requests with RequestOptions",
+      "summary": "This part introduces the concept of 'RequestOptions' to enhance image loading. It lists features such as applying image crops, transition effects, setting placeholders (loading/error states), and managing caching policies.",
+      "code_blocks": []
+    },
+    {
+      "title": "Implementing a Binding Adapter with Glide",
+      "summary": "This section provides a practical example of a 'Binding Adapter' function using the @BindingAdapter annotation. This function integrates Glide with data binding, handling URI construction, and applying RequestOptions for placeholder and error images.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "@BindingAdapter(\"imageUrl\")\nfun bindImage(imgView: ImageView, imgUrl: String?) {\n    imgUrl?.let {\n        val imgUri = imgUrl.toUri().buildUpon().scheme(\"https\").build()\n        Glide.with(imgView)\n            .load(imgUri)\n            .apply(RequestOptions()\n                .placeholder(R.drawable.loading_animation)\n                .error(R.drawable.ic_broken_image))\n            .into(imgView)\n    }\n}",
+          "explanation": "A custom view binding function that automatically loads images from a URL string into an ImageView using Glide. It converts the string to a URI, sets a loading animation placeholder, and an error icon for failed loads."
+        }
+      ]
+    },
+    {
+      "title": "Lesson 11 Summary and Review",
+      "summary": "This section summarizes the learning objectives of Lesson 11 ('Connect to the internet'). It confirms the skills covered include managing AndroidManifest permissions (normal, signature, dangerous), making network requests using Retrofit, parsing JSON with Moshi, and displaying images via Glide. It concludes with a list of resources for further study.",
+      "code_blocks": []
+    }
+  ]
+}

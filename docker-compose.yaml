@@ -27,6 +27,8 @@ services:
       - n8n-network
     volumes:
       - ./ngrok.yml:/etc/ngrok.yml
+    ports:
+      - "4040:4040"
 
 volumes:
   n8n_data:

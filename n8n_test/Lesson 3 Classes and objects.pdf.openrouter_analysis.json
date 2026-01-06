@@ -1,0 +1,327 @@
+{
+  "file": "Lesson 3 Classes and objects.pdf",
+  "total_pages": 56,
+  "analysis_merged": [
+    {
+      "title": "Classes and objects concepts",
+      "summary": "This section introduces the fundamental concepts of Classes and Objects in Kotlin, emphasizing their role as blueprints for creating instances. It contrasts the static definition of a Class (data and behavior) with dynamic Object Instances. A House class example is provided to show how to define properties (color, windows) and methods (updateColor), and how to instantiate it using 'val myHouse = House()'.",
+      "code_blocks": []
+    },
+    {
+      "title": "Constructors and Parameters",
+      "summary": "This part explains Kotlin constructors defined in the class header. It differentiates between parameters without 'val'/'var' (scope-limited to the constructor) and those with 'val'/'var' (persist as class properties). A code example demonstrates that accessing a property 'x' from class B (defined as 'x: Int' without val/var) results in a compiler error, whereas class C (defined as 'val y: Int') successfully exposes the property.",
+      "code_blocks": [
+        {
+          "language": "kotlin",
+          "code": "class A\n\nclass B(x: Int)\n\nclass C(val y: Int)",
+          "explanation": "Defines three classes. Class B's 'x' is a constructor argument only, while Class C's 'y' is a property of the class instance."
+        },
+        {
+          "language": "kotlin",
+          "code": "val aa = A()\nval bb = B(12)\nprintln(bb.x) // => compiler error unresolved reference\nval cc = C(42)\nprintln(cc.y) // => 42",
+          "explanation": "Demonstrates instantiating the classes and accessing properties. Accessing 'bb.x' fails because 'x' is not a property, while 'cc.y' returns 42."
+        }
+      ]
+    },
+    {
+      "title": "Default Parameters",
+      "summary": "Classes in Kotlin can utilize default parameter values to minimize the need for multiple constructors or overloads. This allows for more concise code. The example shows a 'Box' class with default values for 'width' and 'height', allowing instantiation with only the required 'length' or by specifying named parameters.",
+      "code_blocks": [
+        {
+          "language": "kotlin",
+          "code": "class Box(val length: Int, val width: Int = 20, val height: Int = 40)\nval box1 = Box(100, 20, 40)\nval box2 = Box(length = 100)\nval box3 = Box(length = 100, width = 20, height = 40)",
+          "explanation": "Shows the usage of default values in the 'Box' class constructor, enabling flexible instantiation methods including named arguments."
+        }
+      ]
+    },
+    {
+      "title": "Primary Constructors",
+      "summary": "The primary constructor is declared in the class header. It is technically equivalent to defining a 'constructor' block inside the class body, though the header syntax is standard. The 'init' block is used to execute code during the initialization of the class.",
+      "code_blocks": [
+        {
+          "language": "kotlin",
+          "code": "class Circle(i: Int) {\n    init {\n        ...\n    }\n}",
+          "explanation": "Defines a class 'Circle' with a primary constructor using an 'init' block for initialization logic."
+        },
+        {
+          "language": "kotlin",
+          "code": "class Circle {\n    constructor(i: Int) {\n        ...\n    }\n}",
+          "explanation": "Shows the equivalent structure using a secondary constructor inside the class body."
+        }
+      ]
+    },
+    {
+      "title": "Initializer Blocks (Khối Khởi Tạo)",
+      "summary": "Phần này mở rộng kiến thức về khởi tạo lớp từ phần trước. Dù đã đề cập về 'init' block, phần này làm rõ vai trò: nó chứa mã khởi tạo bắt buộc, có thể có nhiều khối 'init', và các khối này trở thành phần thân của constructor chính. Nó cũng cung cấp một ví dụ mã hóa.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "class Square(val side: Int) {\ninit {\nprintln(side * 2)\n}\n}\nval s = Square(10)\n// Output: 20",
+          "explanation": "Ví dụ minh họa cách dùng từ khóa 'init'. Code bên trong khối này chạy tự động khi đối tượng được tạo. Trong ví dụ này, nó in ra tổng chu vi (side * 2)."
+        }
+      ]
+    },
+    {
+      "title": "Đa hình thức Khởi tạo (Secondary Constructors)",
+      "summary": "Giới thiệu cách định nghĩa các constructor thứ cấp (secondary constructors) bằng từ khóa 'constructor'. Quan trọng nhất là quy tắc: secondary constructor PHẢI gọi primary constructor (dùng 'this') hoặc gọi một secondary constructor khác mà cuối cùng gọi primary constructor.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "class Circle(val radius:Double) {\nconstructor(name:String) : this(1.0)\nconstructor(diameter:Int) : this(diameter / 2.0) {\nprintln(\"in diameter constructor\")\n}\ninit {\nprintln(\"Area: ${Math.PI * radius * radius}\")\n}\n}\nval c = Circle(3)",
+          "explanation": "Lớp Circle có một primary constructor và hai secondary constructors. Constructor nhận Int gọi primary với nửa giá trị đường kính. Constructor nhận String mặc định gọi primary với giá trị 1.0. Khối init vẫn chạy khi primary constructor được gọi."
+        }
+      ]
+    },
+    {
+      "title": "Thuộc tính (Properties)",
+      "summary": "Giải thích cách định nghĩa và truy cập thuộc tính using 'val' (read-only) và 'var' (read-write). Sử dụng dấu chấm (dot notation) để truy cập và gán giá trị.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "class Person(var name: String)\nfun main() {\nval person = Person(\"Alex\")\nprintln(person.name) // Access\nperson.name = \"Joey\" // Set\nprintln(person.name)\n}",
+          "explanation": "Minh họa khai báo thuộc tính biến (var) và cách sử dụng cú pháp dấu chấm để đọc (get) và ghi (set) giá trị thuộc tính."
+        }
+      ]
+    },
+    {
+      "title": "Custom Getters and Setters",
+      "summary": "Hướng dẫn cách ghi đè hành vi mặc định của getter và setter cho các thuộc tính. Getter được dùng để tính toán giá trị động (ví dụ: fullName), Setter cho phép xử lý logic khi giá trị được gán (ví dụ: tách chuỗi).",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "class Person(val firstName: String, val lastName:String) {\nval fullName:String\nget() {\nreturn \"$firstName $lastName\"\n}\n}\nval person = Person(\"John\", \"Doe\")\nprintln(person.fullName)\n// Output: John Doe",
+          "explanation": "Ví dụ Custom Getter: Thuộc tính 'fullName' không được lưu trữ trực tiếp mà được tính toán động bằng cách ghép 'firstName' và 'lastName' mỗi khi được truy cập."
+        },
+        {
+          "language": "Kotlin",
+          "code": "var fullName:String = \"\"\nget() = \"$firstName $lastName\"\nset(value) {\nval components = value.split(\" \")\nfirstName = components[0]\nlastName = components[1]\nfield = value\n}\nperson.fullName = \"Jane Smith\"",
+          "explanation": "Ví dụ Custom Setter: Kởi gán chuỗi vào 'fullName', logic sẽ tách chuỗi để cập nhật các thuộc tính 'firstName' và 'lastName'. Từ khóa 'field' dùng để lưu giá trị backing field."
+        }
+      ]
+    },
+    {
+      "title": "Hàm Thành viên (Member Functions)",
+      "summary": "Xác nhận rằng các hàm (functions) có thể được định nghĩa bên trong lớp. Các hàm này tuân thủ quy tắc khai báo hàm thông thường (fun).",
+      "code_blocks": []
+    },
+    {
+      "title": "Inheritance",
+      "summary": "Giới thiệu khái niệm kế thừa trong Kotlin. Kotlin chỉ hỗ trợ kế thừa đơn (single-parent class), mỗi lớp con kế thừa tất cả thành viên từ lớp cha (superclass). Để tránh hạn chế này, có thể sử dụng interface (cho phép thực hiện nhiều interface).",
+      "code_blocks": []
+    },
+    {
+      "title": "Interfaces",
+      "summary": "Interface tạo ra một hợp đồng (contract) mà các lớp thực thi phải tuân theo. Nó có thể chứa tên thuộc tính và chữ ký phương thức, và có thể kế thừa từ các interface khác.",
+      "code_blocks": []
+    },
+    {
+      "title": "Interface Example",
+      "summary": "Ví dụ minh họa việc định nghĩa interface `Shape` với phương thức `computeArea`, và lớp `Circle` реализует interface này bằng cách ghi đè phương thức. Kết quả tính diện tích hình tròn được in ra.",
+      "code_blocks": [
+        {
+          "language": "kotlin",
+          "code": "interface Shape {\nfun computeArea() : Double\n}\nclass Circle(val radius:Double) : Shape {\noverride fun computeArea() = Math.PI * radius * radius\n}\nval c = Circle(3.0)\nprintln(c.computeArea())",
+          "explanation": "Định nghĩa một interface Shape và một lớp Circle implement interface đó. Lớp Circle ghi đè phương thức computeArea để tính diện tích."
+        }
+      ]
+    },
+    {
+      "title": "Extending Classes",
+      "summary": "Giải thích hai cách mở rộng lớp: tạo lớp con (subclass) hoặc sử dụng extension functions để thêm chức năng mà không tạo lớp mới.",
+      "code_blocks": []
+    },
+    {
+      "title": "Creating a New Class",
+      "summary": "Khái niệm quan trọng: Các lớp trong Kotlin mặc định là `final` (không thể kế thừa). Phải dùng từ khóa `open` để cho phép kế thừa. Thuộc tính và hàm cần ghi đè phải dùng từ khóa `override`.",
+      "code_blocks": []
+    },
+    {
+      "title": "Classes are final by default",
+      "summary": "Minh họa lỗi biên dịch khi cố gắng kế thừa từ một lớp không được khai báo là `open`.",
+      "code_blocks": [
+        {
+          "language": "kotlin",
+          "code": "class A\nclass B : A",
+          "explanation": "Ví dụ lỗi do lớp A mặc định là final và không thể được kế thừa."
+        }
+      ]
+    },
+    {
+      "title": "Use open keyword",
+      "summary": "Hướng dẫn cách sử dụng từ khóa `open` để cho phép kế thừa một lớp.",
+      "code_blocks": [
+        {
+          "language": "kotlin",
+          "code": "open class C\nclass D : C()",
+          "explanation": "Lớp C được khai báo mở (open) để lớp D có thể kế thừa nó."
+        }
+      ]
+    },
+    {
+      "title": "Overriding",
+      "summary": "Quy tắc ghi đè (overriding): Phải dùng `open` cho các phương thức/ thuộc tính cho phép ghi đè, dùng `override` khi thực hiện ghi đè. Các thành viên được đánh dấu `override` mặc định là có thể ghi đè tiếp trừ khi đánh dấu `final`.",
+      "code_blocks": []
+    },
+    {
+      "title": "Abstract Classes",
+      "summary": "Lớp trừu tượng (Abstract class) được đánh dấu bằng từ khóa `abstract`, không thể khởi tạo trực tiếp và phải được kế thừa. Nó khác interface ở chỗ có thể lưu trữ trạng thái (state). Các thành viên trừu tượng bắt buộc phải được ghi đè.",
+      "code_blocks": []
+    },
+    {
+      "title": "Ví dụ về Lớp Trừu tượng (Abstract Class)",
+      "summary": "Cung cấp một ví dụ mã nguồn Kotlin minh họa cách khai báo lớp trừu tượng (`Food`) với các thuộc tính trừu tượng (`kcal`, `name`) và phương thức thường (`consume`). Lớp `Pizza` kế thừa và cung cấp giá trị cụ thể cho các thuộc tính này. Đoạn code này minh họa tính kế thừa và việc buộc lớp con phải định nghĩa trạng thái.",
+      "code_blocks": [
+        {
+          "language": "kotlin",
+          "code": "abstract class Food {\nabstract val kcal : Int\nabstract val name : String\nfun consume() = println(\"I'm eating ${name}\")\n}\nclass Pizza() : Food() {\noverride val kcal = 600\noverride val name = \"Pizza\"\n}\nfun main() {\nPizza().consume() // \"I'm eating Pizza\"\n}",
+          "explanation": "Định nghĩa lớp trừu tượng `Food` và lớp con `Pizza`. Code minh họa việc ghi đè thuộc tính trừu tượng và gọi phương thức thường từ lớp cha."
+        }
+      ]
+    },
+    {
+      "title": "Khi nào sử dụng Interface so với Class",
+      "summary": "Cung cấp các hướng dẫn quyết định (guidelines) để lựa chọn giữa Interface và Class (cả thường và trừu tượng). Các tiêu chí bao gồm: phạm vi hành vi (rộng hay hẹp), nhu cầu đa kế thừa, và việc cần định nghĩa các thuộc tính/phương thức trừu tượng để lớp con định nghĩa sau.",
+      "code_blocks": []
+    },
+    {
+      "title": "Extension Functions (Phương thức mở rộng)",
+      "summary": "Giới thiệu khái niệm Extension functions trong Kotlin. Đây là tính năng cho phép thêm phương thức mới vào lớp hiện có mà không cần sửa đổi mã nguồn gốc của lớp đó (mặc dù có vẻ như lớp đó đã có phương thức mới).",
+      "code_blocks": [
+        {
+          "language": "kotlin",
+          "code": "fun ClassName.functionName( params ) { body }",
+          "explanation": "Định dạng cú pháp chung để khai báo một phương thức mở rộng."
+        }
+      ]
+    },
+    {
+      "title": "Lợi ích và Quy tắc sử dụng Extension Functions",
+      "summary": "Liệt kê các lý do sử dụng: thêm chức năng vào lớp không cho phép sửa đổi (closed classes), hoặc để tách biệt các phương thức tiện ích khỏi lớp chính. Đề xuất nên định nghĩa extension functions ở nơi dễ tìm thấy (ví dụ: cùng file với lớp đó).",
+      "code_blocks": []
+    },
+    {
+      "title": "Ví dụ Extension Function",
+      "summary": "Minh họa cách thêm phương thức `isOdd()` vào lớp `Int` sẵn có của Kotlin để kiểm tra số lẻ.",
+      "code_blocks": [
+        {
+          "language": "kotlin",
+          "code": "fun Int.isOdd(): Boolean { return this % 2 == 1 }\n3.isOdd()",
+          "explanation": "Định nghĩa và gọi phương thức mở rộng `isOdd` trên kiểu `Int`."
+        }
+      ]
+    },
+    {
+      "title": "Data Class",
+      "summary": "Giới thiệu Data Class - một loại lớp đặc biệt dùng để lưu trữ dữ liệu. Được đánh dấu bằng từ khóa `data`. Nó tự động sinh ra các phương thức tiêu chuẩn như getter/setter, `toString()`, `equals()`, `hashCode()`, `copy()` và các toán tử giải cấu trúc (destructuring).",
+      "code_blocks": [
+        {
+          "language": "kotlin",
+          "code": "data class <NameOfClass>( parameterList )",
+          "explanation": "Cú pháp khai báo Data class."
+        }
+      ]
+    },
+    {
+      "title": "Ví dụ về Data Class",
+      "summary": "Minh họa việc định nghĩa lớp `Player` là Data class và sử dụng nó. Kết quả `println` cho thấy `toString()` được tự động sinh ra với định dạng dễ đọc.",
+      "code_blocks": [
+        {
+          "language": "kotlin",
+          "code": "data class Player(val name: String, val score: Int)\nval firstPlayer = Player(\"Lauren\", 10)\nprintln(firstPlayer)\n// => Player(name=Lauren, score=10)",
+          "explanation": "Code minh họa sự tiện lợi của Data class trong việc sinh mã tự động để xử lý dữ liệu."
+        }
+      ]
+    },
+    {
+      "title": "Pair và Triple",
+      "summary": "Giới thiệu `Pair` và `Triple` là các Data class có sẵn trong Kotlin dùng để lưu trữ 2 hoặc 3 giá trị tương ứng. Khuyến khích sử dụng các Data class tự định nghĩa cho tên thuộc tính có ý nghĩa hơn.",
+      "code_blocks": []
+    },
+    {
+      "title": "Pair and Triple Examples",
+      "summary": "Tiếp nối khái niệm từ phần trước về `Pair` và `Triple`, phần này cung cấp các ví dụ mã nguồn cụ thể. Nó hiển thị cách khởi tạo các đối tượng này và truy cập các thuộc tính của chúng (ví dụ: `.third` cho `Triple`). Các ví dụ này minh họa việc lưu trữ các bộ dữ liệu liên quan như tên sách và tác giả.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val bookAuthor = Pair(\"Harry Potter\", \"J.K. Rowling\")\nprintln(bookAuthor)\nval bookAuthorYear = Triple(\"Harry Potter\", \"J.K. Rowling\", 1997)\nprintln(bookAuthorYear)\nprintln(bookAuthorYear.third)",
+          "explanation": "Minh họa cách tạo Pair và Triple, in chúng ra màn hình, và truy cập phần tử thứ ba của Triple."
+        }
+      ]
+    },
+    {
+      "title": "Pair's 'to' Infix Function",
+      "summary": "Giới thiệu cú pháp 'infix' của Kotlin cho `Pair`. Cụm từ khóa `to` cho phép tạo ra một `Pair` một cách trực quan và ngắn gọn hơn (ví dụ: `\"a\" to \"b\"`). Đây là một kỹ thuật phổ biến được sử dụng khi khởi tạo các `Map`.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val bookAuth1 = \"Harry Potter\".to(\"J. K. Rowling\")\nval bookAuth2 = \"Harry Potter\" to \"J. K. Rowling\"\nval map = mapOf(1 to \"x\", 2 to \"y\", 3 to \"zz\")",
+          "explanation": "Sử dụng phương thức infix 'to' để tạo các đối tượng Pair, sau đó sử dụng chúng để tạo Map."
+        }
+      ]
+    },
+    {
+      "title": "Enum Class",
+      "summary": "Giới thiệu `enum class` như một cách để định nghĩa kiểu dữ liệu người dùng cho một tập hợp các giá trị hằng số. Nó đảm bảo rằng một biến chỉ có thể nhận một trong các giá trị được xác định trước.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "enum class Color(val r: Int, val g: Int, val b: Int) {\nRED(255, 0, 0), GREEN(0, 255, 0), BLUE(0, 0, 255)\n}\nprintln(\"\" + Color.RED.r + \" \" + Color.RED.g + \" \" + Color.RED.b)",
+          "explanation": "Định nghĩa một Enum chứa các giá trị màu sắc với các tham số cấu trúc (r, g, b) và truy cập các thuộc tính đó."
+        }
+      ]
+    },
+    {
+      "title": "Object (Singleton)",
+      "summary": "Giới thiệu từ khóa `object` trong Kotlin để triển khai mô hình Singleton (đối tượng duy nhất). Thay vì tạo nhiều instance, `object` cho phép truy cập trực tiếp vào các phương thức và biến thông qua tên của đối tượng.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "object Calculator {\nfun add(n1: Int, n2: Int): Int {\nreturn n1 + n2\n}\n}\nprintln(Calculator.add(2,4))",
+          "explanation": "Tạo một lớp Singleton 'Calculator' và gọi phương thức 'add' trực tiếp mà không cần khởi tạo đối tượng."
+        }
+      ]
+    },
+    {
+      "title": "Companion Objects",
+      "summary": "Giới thiệu `companion object`, cho phép các instance của một lớp chia sẻ chung một biến hoặc hàm. Nó được sử dụng để lưu trữ các hằng số hoặc phương thức factory liên quan đến lớp đó, và được truy cập thông qua tên lớp.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "class PhysicsSystem {\ncompanion object WorldConstants {\nval gravity = 9.8\nval unit = \"metric\"\nfun computeForce(mass: Double, accel: Double): Double {\nreturn mass * accel\n}\n}\n}\nprintln(PhysicsSystem.WorldConstants.gravity)\nprintln(PhysicsSystem.WorldConstants.computeForce(10.0, 10.0))",
+          "explanation": "Sử dụng companion object để định nghĩa các hằng số vật lý và phương thức tính toán có thể truy cập thông qua lớp 'PhysicsSystem'."
+        }
+      ]
+    },
+    {
+      "title": "Organizing Your Code",
+      "summary": "Phần này đề cập đến quy ước tổ chức code trong Kotlin. Nó làm rõ rằng Kotlin không bắt buộc phải có một thực thể (lớp/接口) duy nhất trong một file, và khuyến khích việc nhóm các cấu trúc liên quan vào cùng một file để tăng tính tổ chức.",
+      "code_blocks": []
+    },
+    {
+      "title": "Packages and Organization",
+      "summary": "This section explains the role of Packages in Kotlin for organizing code. It notes that package names should be lowercase and separated by periods (e.g., org.example.game), and must be declared at the top of the file. It includes a diagram illustrating a class hierarchy within a package structure (org.example.vehicle).",
+      "code_blocks": [
+        {
+          "language": "kotlin",
+          "code": "package org.example.game",
+          "explanation": "Syntax for declaring a package at the beginning of a Kotlin file to organize code."
+        }
+      ]
+    },
+    {
+      "title": "Visibility Modifiers",
+      "summary": "This section covers visibility modifiers used to control access to class members. It defines 'public' (default, visible outside the class), 'private' (visible only within the class/file), and 'protected' (visible to the class and its subclasses).",
+      "code_blocks": []
+    },
+    {
+      "title": "Lesson 3 Summary",
+      "summary": "A comprehensive list of topics covered in Lesson 3, serving as a revision checklist. It includes Classes, Constructors, Getters/Setters, Inheritance, Interfaces, Extension functions, Special Classes (Data classes, Enums, Objects, Companion objects), Packages, and Visibility Modifiers.",
+      "code_blocks": []
+    },
+    {
+      "title": "Practice Pathway",
+      "summary": "This section provides a call to action for the learner to complete the 'Lesson 3: Classes and objects' pathway to practice the concepts covered.",
+      "code_blocks": []
+    }
+  ]
+}

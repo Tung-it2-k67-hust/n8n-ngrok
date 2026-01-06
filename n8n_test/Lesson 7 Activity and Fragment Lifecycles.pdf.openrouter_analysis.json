@@ -1,0 +1,136 @@
+{
+  "file": "Lesson 7 Activity and Fragment Lifecycles.pdf",
+  "total_pages": 46,
+  "analysis_merged": [
+    {
+      "title": "Android Activity Lifecycle Fundamentals",
+      "summary": "This lesson introduces the Android Activity and Fragment lifecycles. It emphasizes the importance of understanding these states to preserve user data and state during events like app interruptions, device rotation, or returning to the app. It also highlights the need to avoid memory leaks and crashes. The content details the standard lifecycle methods (onCreate, onStart, onResume, onPause, onStop, onDestroy) and the corresponding Activity states (CREATED, STARTED, RESUMED, PAUSED, STOPPED, DESTROYED).",
+      "code_blocks": [
+        {
+          "language": "Text/Diagram",
+          "code": "onCreate()\nonRestart() onStart()\nonResume()\nonPause()\nonStop()\nonDestroy()",
+          "explanation": "This sequence represents the standard flow of Activity lifecycle methods from launch to destruction."
+        }
+      ]
+    },
+    {
+      "title": "Hoạt động Activity lifecycle: onPause, onStop, onDestroy và tổng hợp",
+      "summary": "Phần này hoàn thiện phần giải thích về các callback còn lại của Activity lifecycle. onPaused() được kích hoạt khi Activity mất tiêu điểm nhưng vẫn видим. onStop() khi Activity không còn видим và nên giải phóng tài nguyên. onDestroy() khi Activity bị hủy (kết thúc hoặc thay đổi cấu hình) và không nên dùng để lưu dữ liệu. Cuối cùng, bảng tóm tắt tóm tắt các trạng thái (Created, Started, Resumed, Paused, Stopped, Destroyed) tương ứng với các callback.",
+      "code_blocks": []
+    },
+    {
+      "title": "Lưu trạng thái UI (Save state)",
+      "summary": "Người dùng mong muốn UI giữ nguyên sau khi xoay màn hình hoặc app bị tắt ngầm. Để xử lý việc này, cần lưu dữ liệu vào Bundle trong onSaveInstanceState() và khôi phục lại trong onCreate() khi Activity được tạo lại.",
+      "code_blocks": [
+        {
+          "language": "Kotlin (Ngụy ngữ)",
+          "code": "onSaveInstanceState(Bundle) \n→ onCreate(Bundle)",
+          "explanation": "Đoạn code minh họa luồng lưu và khôi phục trạng thái: Dữ liệu được lưu vào Bundle trong onSaveInstanceState(), và Bundle này được truyền vào onCreate() khi Activity được khởi tạo lại."
+        }
+      ]
+    },
+    {
+      "title": "Logging và gỡ lỗi",
+      "summary": "Giới thiệu việc sử dụng Log để theo dõi luồng sự kiện và trạng thái ứng dụng. Sử dụng lớp Log với các mức độ ưu tiên khác nhau (Verbose, Debug, Info, Warning, Error).",
+      "code_blocks": [
+        {
+          "language": "Kotlin/Java",
+          "code": "Log.d(TAG, \"Message\")",
+          "explanation": "Ví dụ gọi phương thức Log.d để ghi log ở mức độ Debug với tag và message."
+        },
+        {
+          "language": "Kotlin (Bảng phương thức)",
+          "code": "Log.v(), Log.d(), Log.i(), Log.w(), Log.e()",
+          "explanation": "Danh sách các phương thức log tương ứng với các mức độ ưu tiên từ Thấp (Verbose) đến Cao (Error)."
+        }
+      ]
+    },
+    {
+      "title": "Fragment lifecycle và các trạng thái",
+      "summary": "Phần này bắt đầu chuyển sang Fragment lifecycle. Nó liệt kê các trạng thái tương tự Activity: CREATED, STARTED, RESUMED, PAUSED, STOPPED, DESTROYED, và nhấn mạnh trạng thái 'Fragment is running' tương ứng với RESUMED.",
+      "code_blocks": []
+    },
+    {
+      "title": "Fragment Lifecycle Diagram & States",
+      "summary": "The content expands on the previous mention of Fragment states (CREATED, STARTED, RESUMED, etc.) by providing a visual diagram and a detailed table. It maps specific lifecycle callbacks (onCreate, onStart, onResume, onPause, onStop, onDestroyView, onDestroy, onDetach) to these states. It emphasizes that the 'Fragment is active' state corresponds to Resumed, while 'Fragment is destroyed' involves the destruction of the view and the fragment itself being detached.",
+      "code_blocks": []
+    },
+    {
+      "title": "Key Lifecycle Callbacks: onAttach & onCreateView",
+      "summary": "This section details the earliest and most critical setup callbacks. onAttach is triggered when the Fragment connects to its host Activity, immediately followed by onCreate. onCreateView is specifically for inflating the fragment's UI layout and returning the root view.",
+      "code_blocks": []
+    },
+    {
+      "title": "Post-View Creation: onViewCreated",
+      "summary": "Once the view hierarchy is established via onCreateView, onViewCreated is called. This is the recommended place for any final view initialization or restoring state from a Bundle, as the view is guaranteed to exist here.",
+      "code_blocks": []
+    },
+    {
+      "title": "Destruction Phase: onDestroyView & onDetach",
+      "summary": "This explains the cleanup process. onDestroyView is called when the view hierarchy is removed, and onDetach occurs when the Fragment is finally severed from its host Activity.",
+      "code_blocks": []
+    },
+    {
+      "title": "Configuration Changes & State Preservation",
+      "summary": "To survive configuration changes (like screen rotation), the text advises using onSaveInstanceState to store UI state in a Bundle. This data can then be retrieved in onCreate, onCreateView, or onViewCreated to restore the state.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "override fun onSaveInstanceState(outState: Bundle) {\n    super.onSaveInstanceState(outState)\n    // Store state data in outState\n}\n\noverride fun onCreate(savedInstanceState: Bundle?) {\n    super.onCreate(savedInstanceState)\n    // Retrieve state data from savedInstanceState\n}",
+          "explanation": "Shows how to save state before destruction and retrieve it upon recreation to handle configuration changes."
+        }
+      ]
+    },
+    {
+      "title": "Lifecycle-Aware Components & LifecycleOwner",
+      "summary": "Introduces the concept of Lifecycle-aware components (from androidx.lifecycle) which automatically adjust behavior based on the lifecycle state. It highlights the LifecycleOwner interface, which is implemented by classes like Fragment and AppCompatActivity to expose their lifecycle states and events to these components.",
+      "code_blocks": []
+    },
+    {
+      "title": "LifecycleObserver Implementation",
+      "summary": "Nội dung giải thích cách tạo một 'Lifecycle-aware component' bằng cách implement interface `LifecycleObserver`. Component này sử dụng annotation `@OnLifecycleEvent` để đăng ký các callback cho các sự kiện lifecycle c cụ thể (ví dụ: `ON_RESUME`). Cuối cùng, observer phải được đăng ký vào lifecycle owner thông qua `lifecycle.addObserver()`. Điều này cho phép component tự động phản hồi thay đổi lifecycle mà không cần can thiệp trực tiếp vào Activity/Fragment.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "class MyObserver : LifecycleObserver {\n    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)\n    fun connectListener() {\n        ...\n    }\n}\n\nmyLifecycleOwner.getLifecycle().addObserver(MyObserver())",
+          "explanation": "Đoạn code định nghĩa class `MyObserver` implement `LifecycleObserver` và đăng ký hàm `connectListener()` để gọi khi Lifecycle chuyển sang state `ON_RESUME`. Dòng cuối thêm observer vào lifecycle của chủ thể (Activity/Fragment)."
+        }
+      ]
+    },
+    {
+      "title": "Back Stack of Activities",
+      "summary": "Phần này mô phỏng cách hoạt động của Back Stack trong Android (từng là cơ chế quản lý Activity chính). Qua các ví dụ (EmailActivity -> ComposeActivity -> AttachFileActivity), tài liệu minh họa quy tắc LIFO (Last In, First Out). Khi người dùng nhấn nút Back, Activity hiện tại bị hủy (popped off) và quay về Activity trước đó trong stack. Điều này cung cấp trải nghiệm điều hướng quay lui (up navigation) theo mặc định.",
+      "code_blocks": []
+    },
+    {
+      "title": "Back Stack with Fragments",
+      "summary": "Dựa trên khái niệm Back stack của Activity (trang 31), nội dung này mở rộng sang mô hình điều hướng hiện đại hơn sử dụng Fragment. Nó minh họa tương tự cơ chế LIFO: thêm các Fragment (FirstFragment -> SecondFragment) vào back stack. Khi nhấn Back, Fragment hiện tại (SecondFragment) được loại bỏ để hiển thị Fragment trước đó (FirstFragment). Đây là nền tảng cho Navigation Component hiện nay.",
+      "code_blocks": []
+    },
+    {
+      "title": "Back Stack Example",
+      "summary": "Trang 41 minh họa trực quan cấu trúc Back stack bằng cách liệt kê các Fragment theo thứ tự LIFO: WelcomeFragment -> Question1Fragment -> Question2Fragment -> Question3Fragment -> ResultFragment. Điều này củng cố khái niệm từ phần trước về cách các Fragment được thêm vào stack và cách hoạt động của nút Back.",
+      "code_blocks": []
+    },
+    {
+      "title": "Modify Back Button Behavior",
+      "summary": "Trang 42 đề cập đến việc tùy chỉnh hành vi của nút Back, cụ thể là 'pop additional destinations'. Dựa trên ngữ cảnh trước đó về Fragment, điều này ám chỉ việc sử dụng `popBackStack()` hoặc các hành động trong Navigation Component để loại bỏ nhiều Fragment khỏi stack cùng một lúc thay vì chỉ quay lại từng bước một.",
+      "code_blocks": []
+    },
+    {
+      "title": "Lesson 7 Summary",
+      "summary": "Trang 43-44 tóm tắt các kiến thức chính của bài học Lesson 7: vòng đời Activity và Fragment, cách bảo toàn UI state bằng Bundle (do thay đổi cấu hình), sử dụng Lifecycle-aware components, và quản lý Back stack.",
+      "code_blocks": []
+    },
+    {
+      "title": "Tài liệu tham khảo",
+      "summary": "Trang 45 liệt kê các tài liệu chính thức để tìm hiểu sâu hơn về Activity Lifecycle, Fragment guide và các lớp liên quan.",
+      "code_blocks": []
+    },
+    {
+      "title": "Pathway",
+      "summary": "Trang 46 gợi ý hoàn thành pathway 'Lesson 7: Activity and Fragment Lifecycles' để thực hành những gì đã học.",
+      "code_blocks": []
+    }
+  ]
+}

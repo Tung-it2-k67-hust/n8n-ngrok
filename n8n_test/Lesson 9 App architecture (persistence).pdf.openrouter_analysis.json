@@ -1,0 +1,247 @@
+{
+  "file": "Lesson 9 App architecture (persistence).pdf",
+  "total_pages": 55,
+  "analysis_merged": [
+    {
+      "title": "Android Data Storage Fundamentals and Room Overview",
+      "summary": "This section introduces data persistence in Android, covering storage methods (app-specific, shared, preferences, databases) and relational database concepts (tables, rows, columns). It explains SQL basics and raw SQLite usage, highlighting the boilerplate code and lack of compile-time verification issues. It concludes with an introduction to the Room persistence library as a solution.",
+      "code_blocks": [
+        {
+          "language": "SQL",
+          "code": "INSERT INTO colors VALUES (\"red\", \"#FF0000\");\nSELECT * from colors;\nUPDATE colors SET hex=\"#DD0000\" WHERE name=\"red\";\nDELETE FROM colors WHERE name = \"red\";",
+          "explanation": "Examples of standard SQL commands (Create, Read, Update, Delete) used to interact with a database."
+        }
+      ]
+    },
+    {
+      "title": "Thiết lập Room với Gradle",
+      "summary": "Phần này hướng dẫn cách thêm các dependency cần thiết cho Room vào file build.gradle. Nó bao gồm: library runtime, compiler (dùng kapt cho Kotlin), library KTX cho hỗ trợ Kotlin & Coroutines, và library testing.",
+      "code_blocks": [
+        {
+          "language": "Groovy/Gradle",
+          "code": "dependencies {\nimplementation \"androidx.room:room-runtime:$room_version\"\nkapt \"androidx.room:room-compiler:$room_version\"\nimplementation \"androidx.room:room-ktx:$room_version\"\ntestImplementation \"androidx.room:room-testing:$room_version\"\n}",
+          "explanation": "Đoạn code này khai báo các thư viện cần thiết để sử dụng Room, trong đó kapt được sử dụng để xử lý annotations trong Kotlin."
+        }
+      ]
+    },
+    {
+      "title": "Kiến trúc Room và các thành phần chính",
+      "summary": "Giới thiệu mô hình kiến trúc của Room, tách biệt giữa mã nguồn ứng dụng và truy cập dữ liệu (DAO). Các thành phần chính bao gồm Entity (đối tượng dữ liệu), DAO (đối tượng truy cập dữ liệu) và Database (điểm kết nối cơ sở dữ liệu).",
+      "code_blocks": []
+    },
+    {
+      "title": "Định nghĩa Entity và Mapping",
+      "summary": "Giải thích cách sử dụng các annotation (@Entity, @PrimaryKey, @ColumnInfo) để ánh xạ một class Kotlin (data class) thành bảng trong SQLite database. Các annotation cho phép tự sinh mã và cung cấp thông tin metadata như tên bảng, tên cột.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "@Entity(tableName = \"colors\")\ndata class Color(\n    @PrimaryKey(autoGenerate = true) val _id: Int,\n    @ColumnInfo(name = \"hex_color\") val hex: String,\n    val name: String\n)",
+          "explanation": "Định nghĩa Entity 'Color'. @Entity chỉ định tên bảng, @PrimaryKey định nghĩa khóa chính tự sinh, và @ColumnInfo cho phép đặt tên cột tùy chỉnh (ví dụ: 'hex' -> 'hex_color')."
+        }
+      ]
+    },
+    {
+      "title": "Data Access Object (DAO)",
+      "summary": "Phần này nhấn mạnh việc sử dụng DAO thay vì truy vấn trực tiếp cơ sở dữ liệu. DAO là interface hoặc abstract class mà Room sẽ tự động triển khai implementation tại thời điểm biên dịch. Lợi ích chính là việc kiểm tra truy vấn (query verification) ở compile-time.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "@Dao\ninterface ColorDao {\n    @Query(\"SELECT * FROM colors\")\n    fun getAll(): Array<Color>\n    @Insert\n    fun insert(vararg color: Color)\n    @Update\n    fun update(color: Color)\n    @Delete\n    fun delete(color: Color)\n}",
+          "explanation": "Interface DAO khai báo các phương thức truy cập dữ liệu. Các annotation như @Query, @Insert, @Update, @Delete ánh xạ trực tiếp đến thao tác SQL tương ứng."
+        }
+      ]
+    },
+    {
+      "title": "Phương thức truy vấn (Query Methods)",
+      "summary": "Phần này mở rộng interface ColorDao bằng các phương thức truy vấn dữ liệu. Nó sử dụng annotation @Query với cú pháp SQL để lấy dữ liệu. Điểm nhấn là cách truyền tham số (:name, :hex) từ Kotlin vào truy vấn SQL, và cách trả về dữ liệu (Array<Color> hoặc LiveData<Color>). LiveData cho phép UI tự động cập nhật khi dữ liệu cơ sở dữ liệu thay đổi.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "@Dao\ninterface ColorDao {\n    @Query(\"SELECT * FROM colors\")\n    fun getAll(): Array<Color>\n    @Query(\"SELECT * FROM colors WHERE name = :name\")\n    fun getColorByName(name: String): LiveData<Color>\n    @Query(\"SELECT * FROM colors WHERE hex_color = :hex\")\n    fun getColorByHex(hex: String): LiveData<Color>\n}",
+          "explanation": "Định nghĩa các phương thức truy vấn: lấy tất cả, lấy theo tên, lấy theo mã màu. Sử dụng LiveData để quan sát dữ liệu."
+        }
+      ]
+    },
+    {
+      "title": "Phương thức Insert, Update, Delete",
+      "summary": "Đoạn này liệt kê các annotation tiêu chuẩn của Room (@Insert, @Update, @Delete) để thao tác dữ liệu. Code minh họa cách khai báo các phương thức này trong DAO interface. Room sẽ tự sinh mã thực thi tương ứng với từng thao tác CRUD.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "@Insert\nfun insert(vararg color: Color)\n@Update\nfun update(color: Color)\n@Delete\nfun delete(color: Color)",
+          "explanation": "Khai báo các phương thức CRUD cơ bản trong DAO. @Insert支持vararg để chèn nhiều đối tượng cùng lúc."
+        }
+      ]
+    },
+    {
+      "title": "Tạo Room Database",
+      "summary": "Hướng dẫn các bước thiết lập lớp cơ sở dữ liệu chính (Database). Cần dùng annotation @Database để khai báo entities (bảng dữ liệu) và version. Lớp này phải là abstract class kế thừa từ RoomDatabase và chứa abstract method trả về DAO interface đã định nghĩa trước đó.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "@Database(entities = [Color::class], version = 1)\nabstract class ColorDatabase : RoomDatabase() {\n    abstract fun colorDao(): ColorDao\n}",
+          "explanation": "Định nghĩa lớp RoomDatabase, liên kết Entity (Color) và DAO (ColorDao)."
+        }
+      ]
+    },
+    {
+      "title": "Cài đặt Singleton Database Instance",
+      "summary": "Phần này giải quyết việc tạo duy nhất một instance của cơ sở dữ liệu (Singleton Pattern). Sử dụng @Volatile và synchronized để đảm bảo thread-safe trong môi trường đa luồng. Room.databaseBuilder được dùng để khởi tạo database.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "companion object {\n    @Volatile\n    private var INSTANCE: ColorDatabase? = null\n    fun getInstance(context: Context): ColorDatabase {\n        return INSTANCE ?: synchronized(this) {\n            INSTANCE ?: Room.databaseBuilder(\n                context.applicationContext,\n                ColorDatabase::class.java, \"color_database\"\n            )\n            .fallbackToDestructiveMigration()\n            .build()\n            .also { INSTANCE = it }\n        }\n    }\n}",
+          "explanation": "Triển khai Singleton thread-safe để lấy instance Database. Sử dụng `Room.databaseBuilder` và `fallbackToDestructiveMigration` (tự động xóa dữ liệu cũ nếu không có migration)."
+        }
+      ]
+    },
+    {
+      "title": "Sử dụng DAO",
+      "summary": "Minh họa cách thực tế để lấy DAO từ instance database và thực hiện thao tác chèn dữ liệu (Insert). Đây là bước kết nối giữa logic ứng dụng và database.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val colorDao = ColorDatabase.getInstance(application).colorDao()\nval newColor = Color(hex = \"#6200EE\", name = \"purple\")\ncolorDao.insert(newColor)",
+          "explanation": "Lấy instance DAO và thực hiện chèn một đối tượng Color mới vào cơ sở dữ liệu."
+        }
+      ]
+    },
+    {
+      "title": "Nhiệm vụ lâu dài (Long-running tasks)",
+      "summary": "Chuyển hướng sang một chủ đề mới: Lập trình bất đồng bộ (Asynchronous programming). Đoạn này liệt kê các loại công việc tốn thời gian (như truy vấn database, tải file, tính toán phức tạp) mà không được phép thực hiện trên luồng chính (Main Thread) để tránh làm treo giao diện người dùng.",
+      "code_blocks": []
+    },
+    {
+      "title": "Introduction to Async Programming",
+      "summary": "This section establishes the necessity of asynchronous programming. It highlights the core conflict in UI development: the need to keep the application responsive while simultaneously managing long-running tasks. It also introduces the concept of controlling task execution flow.",
+      "code_blocks": []
+    },
+    {
+      "title": "Android Async Options",
+      "summary": "Lists existing methods for asynchronous programming on Android, such as Threading and Callbacks. Crucially, it prompts the question of what the 'recommended way' is, transitioning the focus to Coroutines.",
+      "code_blocks": []
+    },
+    {
+      "title": "Coroutines Introduction",
+      "summary": "Introduces Coroutines as the recommended solution. It emphasizes that coroutines allow developers to keep apps responsive and manage long-running tasks efficiently.",
+      "code_blocks": []
+    },
+    {
+      "title": "Coroutines Benefits",
+      "summary": "Details the advantages of using Coroutines over older methods. Key benefits include: Lightweight execution, reduction of memory leaks, built-in support for cancellation (crucial for lifecycle management), and seamless integration with Android Jetpack libraries.",
+      "code_blocks": []
+    },
+    {
+      "title": "Suspend Functions",
+      "summary": "Explains the `suspend` modifier, which marks a function as capable of pausing execution. A critical rule is established: `suspend` functions can only be called from other `suspend` functions or within a Coroutine scope.",
+      "code_blocks": []
+    },
+    {
+      "title": "Suspend and Resume Mechanism",
+      "summary": "Describes the internal mechanics of coroutines. 'Suspend' pauses the function execution and saves local variables. 'Resume' restores the state and continues execution from the exact point it stopped, making asynchronous code look sequential.",
+      "code_blocks": []
+    },
+    {
+      "title": "Data Access Object (DAO) Example",
+      "summary": "Demonstrates a practical application of `suspend` functions in an Android Room Database context. The DAO interface methods (insert, update, delete, select) are marked as `suspend` to ensure database operations do not block the Main Thread.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "@Dao\ninterface ColorDao {\n    @Query(\"SELECT * FROM colors\")\n    suspend fun getAll(): Array<Color>\n    @Insert\n    suspend fun insert(vararg color: Color)\n    @Update\n    suspend fun update(color: Color)\n    @Delete\n    suspend fun delete(color: Color)",
+          "explanation": "Defines a Room Database DAO interface where all database operations are marked with the 'suspend' keyword, ensuring they are non-blocking and can be called safely from coroutines."
+        }
+      ]
+    },
+    {
+      "title": "Coroutine Dispatchers",
+      "summary": "Explains how to control the thread context where coroutines execute using Dispatchers. It maps specific types of tasks to appropriate dispatchers: Main (UI updates), IO (Network/Database), and Default (CPU-intensive calculations).",
+      "code_blocks": []
+    },
+    {
+      "title": "Switching Contexts with withContext",
+      "summary": "This section explains how to move coroutine execution between threads using `withContext`. It demonstrates wrapping blocking IO operations (like network requests) inside `Dispatchers.IO` while maintaining the original context (likely `Dispatchers.Main` for UI) outside the block. This is a direct continuation of the Dispatchers concept introduced in the previous section.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "suspend fun get(url: String) {\n// Start on Dispatchers.Main\nwithContext(Dispatchers.IO) {\n// Switches to Dispatchers.IO\n// Perform blocking network IO here\n}\n// Returns to Dispatchers.Main\n}",
+          "explanation": "A suspend function that uses `withContext` to safely switch to the IO dispatcher for network operations. It automatically resumes on the Main thread after execution, making it ideal for updating UI after fetching data."
+        }
+      ]
+    },
+    {
+      "title": "Coroutine Scopes",
+      "summary": "Introduces `CoroutineScope` as the mandatory container for coroutines. It highlights the scope's responsibilities: tracking active coroutines, enabling bulk cancellation, and bridging standard functions with coroutine code. It lists common scopes like `GlobalScope`, `viewModelScope`, and `lifecycleScope`.",
+      "code_blocks": []
+    },
+    {
+      "title": "Launching Coroutines",
+      "summary": "Distinguishes between the two primary coroutine builders: `launch` (fire-and-forget, returns `Job`, no result) and `async` (returns `Deferred`, allows retrieving a result). The example shows `launch` being used inside a regular function to start a background task.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "fun loadUI() {\nlaunch {\nfetchDocs()\n}\n}",
+          "explanation": "Demonstrates starting a coroutine using `launch` within a scope. Since `launch` returns a `Job`, it is used when the caller does not need to wait for the result of `fetchDocs`."
+        }
+      ]
+    },
+    {
+      "title": "ViewModelScope Lifecycle Management",
+      "summary": "Focuses on `viewModelScope`, a CoroutineScope tied to the lifecycle of a ViewModel. It explains that coroutines started in this scope are automatically canceled when the ViewModel is cleared, preventing memory leaks and unnecessary background work. It provides examples of using `viewModelScope.launch` for database operations.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "class MyViewModel: ViewModel() {\ninit {\nviewModelScope.launch {\n// Coroutine that will be canceled\n// when the ViewModel is cleared\n}\n}\n...",
+          "explanation": "Shows the initialization of a coroutine within a ViewModel using `viewModelScope`. This ensures the background task is scoped strictly to the ViewModel's lifecycle."
+        },
+        {
+          "language": "Kotlin",
+          "code": "class ColorViewModel(val dao: ColorDao, application: Application)\n: AndroidViewModel(application) {\nfun save(color: Color) {\nviewModelScope.launch {\ncolorDao.insert(color)\n}\n}\n...",
+          "explanation": "A practical example of using `viewModelScope` to perform a database insertion asynchronously, ensuring the operation is canceled if the ViewModel is cleared before completion."
+        }
+      ]
+    },
+    {
+      "title": "Database Testing Setup",
+      "summary": "Transitions to testing strategies for Android code, specifically for databases. It outlines the necessary Gradle dependencies and standard JUnit/AndroidX annotations (`@RunWith`, `@Before`, `@After`, `@Test`) required to set up a test environment.",
+      "code_blocks": [
+        {
+          "language": "Gradle (Groovy)",
+          "code": "dependencies {\ntestImplementation 'junit:junit:4.12'\nandroidTestImplementation 'androidx.test.ext:junit:1.1.0'\nandroidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'\n}",
+          "explanation": "Lists the dependencies required for unit and instrumented testing, including JUnit and Espresso."
+        }
+      ]
+    },
+    {
+      "title": "Implementing Database Tests",
+      "summary": "Provides a concrete implementation of a test class `DatabaseTest`. It shows how to set up an in-memory database (`Room.inMemoryDatabaseBuilder`) in the `@Before` method to ensure tests are isolated and fast, and how to close it in the `@After` method.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "@Before\nfun createDb() {\nval context: Context = ApplicationProvider.getApplicationContext()\ndb = Room.inMemoryDatabaseBuilder(context, ColorDatabase::class.java)\n.allowMainThreadQueries()\n.build()\ncolorDao = db.colorDao()\n}\n@After\n@Throws(IOException::class)\nfun closeDb() = db.close()",
+          "explanation": "Setup code for a database test. It creates a temporary in-memory database instance before every test and closes it after to prevent state leakage between tests. `allowMainThreadQueries()` is used to simplify the test execution without requiring background dispatchers."
+        }
+      ]
+    },
+    {
+      "title": "Unit Test Implementation for Room Database",
+      "summary": "This section provides a concrete unit test example (`insertAndRetrieve`) to validate Room database operations. It builds upon the previous context (setting up an in-memory database in `@Before`) by demonstrating how to perform actual data manipulation (insert) and assertions (retrieve and verify count). The lesson is that database interactions should be verified through automated testing to ensure data integrity.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "@Test\n@Throws(Exception::class)\nfun insertAndRetrieve() {\ncolorDao.insert(red, green, blue)\nval colors = colorDao.getAll()\nassert(colors.size == 3)\n}",
+          "explanation": "This test method verifies the DAO's functionality. It inserts three predefined color objects into the database, retrieves the full list of colors, and asserts that the count matches the number of items inserted. This ensures the 'write' and 'read' operations of the database are working correctly."
+        }
+      ]
+    },
+    {
+      "title": "Lesson 9 Summary: Room & Coroutines",
+      "summary": "This segment concludes Lesson 9 by summarizing the key topics covered. It reinforces the connection between using the Room library for persistence, utilizing Kotlin Coroutines for handling asynchronous database operations, and the importance of testing these implementations.",
+      "code_blocks": []
+    },
+    {
+      "title": "Further Learning & Practice Pathway",
+      "summary": "The document concludes with resources for deepening knowledge on specific topics like Room optimization and Coroutines dispatchers, and directs the user to a practice 'Pathway' titled 'Lesson 9: App architecture (persistence)' to apply the learned concepts.",
+      "code_blocks": []
+    }
+  ]
+}

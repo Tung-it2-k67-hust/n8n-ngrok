@@ -1,0 +1,322 @@
+{
+  "file": "Lesson 4 Build your first Android app.pdf",
+  "total_pages": 68,
+  "analysis_merged": [
+    {
+      "title": "Introduction to Android Development",
+      "summary": "This section introduces Lesson 4, 'Build your first Android app,' covering the creation of a first application, understanding app anatomy, layouts, activities, interactivity, Gradle build system, and accessibility.",
+      "code_blocks": []
+    },
+    {
+      "title": "Development Environment",
+      "summary": "Introduces Android Studio as the official Integrated Development Environment (IDE) used for building Android applications.",
+      "code_blocks": []
+    },
+    {
+      "title": "Project Setup",
+      "summary": "Outlines the basic steps to start a new project, including navigating Android Studio and entering project details.",
+      "code_blocks": []
+    },
+    {
+      "title": "Android API Levels and SDK Versions",
+      "summary": "Explains the concept of Android API levels and how to choose SDK versions for a project. It defines three critical configuration values: Minimum SDK (minimum required device version), Target SDK (version the app is designed for), and Compile SDK (library version used for compilation).",
+      "code_blocks": []
+    },
+    {
+      "title": "Android Studio Interface",
+      "summary": "Indicates a tour of the Android Studio user interface (content likely follows in subsequent sections).",
+      "code_blocks": []
+    },
+    {
+      "title": "Running the Application",
+      "summary": "The document outlines the two primary methods for executing an Android application: deploying it to a physical Android device (phone or tablet) or running it on an Android Virtual Device (AVD) emulator installed on the computer. It also mentions the AVD Manager tool used to configure these emulators.",
+      "code_blocks": []
+    },
+    {
+      "title": "Anatomy of an Android App Project",
+      "summary": "This section breaks down the fundamental components of an Android project. It identifies key elements such as Activities (the screens), Resources (layouts, images, audio, themes), and Gradle files (for project configuration).",
+      "code_blocks": []
+    },
+    {
+      "title": "Project Directory Structure",
+      "summary": "The document visualizes the file system tree of a standard Android project (named MyApplication). It highlights the hierarchy, particularly the 'app' directory containing source code ('src/main/java'), resources ('res'), and the manifest ('AndroidManifest.xml'), as well as the Gradle build files at the root.",
+      "code_blocks": [
+        {
+          "language": "Directory Structure",
+          "code": "MyApplication\n├── app\n│   ├── libs\n│   └── src\n│       ├── androidTest\n│       ├── main\n│       │   ├── java\n│       │   ├── res\n│       │   └── AndroidManifest.xml\n│       └── test\n├── build.gradle\n└── gradlew",
+          "explanation": "Visual representation of the standard directory structure for an Android project, showing where source code, resources, and build configuration files are located."
+        }
+      ]
+    },
+    {
+      "title": "Understanding Android Views",
+      "summary": "This part defines 'Views' as the fundamental building blocks of the user interface. A View represents a rectangular area on the screen responsible for drawing and handling user events. Examples provided include TextView, ImageView, and Button. The concept of grouping views to build complex layouts is also introduced.",
+      "code_blocks": []
+    },
+    {
+      "title": "Layouts and XML",
+      "summary": "The document explains that Android uses XML to define the layout of user interfaces. It notes that there is a direct correspondence between XML elements representing Views and Kotlin classes that control their functionality. It also mentions the existence of the Layout Editor and the ability to edit layouts directly in XML code.",
+      "code_blocks": []
+    },
+    {
+      "title": "TextView XML Attributes and View Dimensions",
+      "summary": "The document introduces the basic XML structure for a View, specifically a TextView. It explains how to set the text content and introduces the three primary values for sizing attributes like `layout_width` and `layout_height`: `wrap_content` (sized to content), `match_parent` (fills the parent container), and fixed values using `dp` (density-independent pixels).",
+      "code_blocks": [
+        {
+          "language": "XML",
+          "code": "<TextView\nandroid:layout_width=\"wrap_content\"\nandroid:layout_height=\"wrap_content\"\nandroid:text=\"Hello World!\"/>",
+          "explanation": "Defines a TextView that sizes itself to its text content ('Hello World!')."
+        },
+        {
+          "language": "XML",
+          "code": "android:layout_width=\"match_parent\"\nandroid:layout_width=\"48dp\"",
+          "explanation": "Examples of width attributes: one matching the parent container's width, and one set to a fixed size of 48 density-independent pixels."
+        }
+      ]
+    },
+    {
+      "title": "ViewGroups and Layout Containers",
+      "summary": "This section defines ViewGroups as containers that determine how child Views are displayed. It introduces specific layout types: FrameLayout (typically for a single child) and LinearLayout (aligns children in a single row or column using the `android:orientation` attribute). The concept of a parent-child hierarchy is emphasized.",
+      "code_blocks": [
+        {
+          "language": "XML",
+          "code": "<FrameLayout\nandroid:layout_width=\"match_parent\"\nandroid:layout_height=\"match_parent\">\n<TextView\nandroid:layout_width=\"match_parent\"\nandroid:layout_height=\"match_parent\"\nandroid:text=\"Hello World!\"/>\n</FrameLayout>",
+          "explanation": "A FrameLayout acting as a container for a single TextView that matches the full size of the FrameLayout."
+        },
+        {
+          "language": "XML",
+          "code": "<LinearLayout\nandroid:layout_width=\"match_parent\"\nandroid:layout_height=\"match_parent\"\nandroid:orientation=\"vertical\">\n<TextView ... />\n<TextView ... />\n<Button ... />\n</LinearLayout>",
+          "explanation": "A LinearLayout set to vertical orientation, stacking its child views (two TextViews and a Button) on top of each other."
+        }
+      ]
+    },
+    {
+      "title": "App Resources and Directory Structure",
+      "summary": "The document describes resources as static content (layouts, images, strings) used by the application. It outlines the standard directory structure under the `res` folder, specifically mentioning `drawable` (graphics), `layout` (UI definitions), `mipmap` (app icons), and `values` (data like strings).",
+      "code_blocks": []
+    },
+    {
+      "title": "Resource IDs and the R Class",
+      "summary": "This section explains how Android identifies resources. Each resource is assigned a unique ID, and naming conventions recommend lowercase with underscores. Crucially, Android generates a class named `R` (e.g., `R.java`) that contains references to all resources. Resources are accessed programmatically using the format `R.<resource_type>.<resource_name>`.",
+      "code_blocks": [
+        {
+          "language": "Java/Kotlin (Generated)",
+          "code": "R.layout.activity_main\nR.drawable.ic_launcher",
+          "explanation": "Examples of how to reference resources programmatically using the auto-generated R class."
+        }
+      ]
+    },
+    {
+      "title": "Assigning IDs to Views",
+      "summary": "Building on the previous resource concepts, this part explains how to give individual Views specific IDs for programmatic access. This is done by adding the `android:id` attribute with the syntax `@+id/name`. Once defined, the view can be accessed in code via `R.id.<name>`.",
+      "code_blocks": [
+        {
+          "language": "XML",
+          "code": "<TextView\nandroid:id=\"@+id/helloTextView\"\nandroid:layout_width=\"wrap_content\"\nandroid:layout_height=\"wrap_content\"\nandroid:text=\"Hello World!\"/>",
+          "explanation": "XML definition of a TextView with a unique ID 'helloTextView' assigned to it."
+        },
+        {
+          "language": "Kotlin/Java",
+          "code": "R.id.helloTextView",
+          "explanation": "The code syntax used to refer to the specific TextView defined with the ID above."
+        }
+      ]
+    },
+    {
+      "title": "Introduction to Activities",
+      "summary": "Defines an Activity as a single screen with a user interface, representing one main goal an user can accomplish. An app is built from one or more Activities. This establishes the fundamental building block of an Android app discussed from page 31.",
+      "code_blocks": []
+    },
+    {
+      "title": "Activity Lifecycle and Code Structure",
+      "summary": "Shows the basic structure of an Activity class in Kotlin. It extends AppCompatActivity and overrides the onCreate() method. This method is the entry point where the activity is created, and it typically sets the content view using a layout resource ID.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "class MainActivity : AppCompatActivity() {\noverride fun onCreate(savedInstanceState: Bundle?) {\nsuper.onCreate(savedInstanceState)\nsetContentView(R.layout.activity_main)\n}\n}",
+          "explanation": "Defines the MainActivity class. The onCreate() method is called when the activity is created, and setContentView() loads the UI from the XML layout file."
+        }
+      ]
+    },
+    {
+      "title": "Activity Lifecycle States",
+      "summary": "Visualizes the lifecycle: An activity is launched, onCreate() is called, the app runs, and eventually the activity is shut down. This connects to the previous concept of ID assignment by showing when these views are active in memory.",
+      "code_blocks": []
+    },
+    {
+      "title": "Layout Inflation",
+      "summary": "Explains the process of converting XML layout files into actual View objects in memory (ViewGroups and child Views) that are displayed on screen. The Activity uses a LayoutInflater to perform this conversion.",
+      "code_blocks": []
+    },
+    {
+      "title": "Dynamic View Modification",
+      "summary": "Building on the previous concept of finding views by ID, this section explains how to get a reference to a View (like a TextView) programmatically within the Activity to change its properties (e.g., text content) dynamically.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val resultTextView: TextView = findViewById(R.id.textView)\nresultTextView.text = \"Goodbye!\"",
+          "explanation": "Retrieves a View using the ID defined in the layout (R.id.textView) and updates its text property. This fulfills the goal of making the app interactive."
+        }
+      ]
+    },
+    {
+      "title": "Event Handling",
+      "summary": "Describes the mechanism of interaction: User interacts with a View -> Event is fired -> Callback (Listener) is executed if registered. This is the logic behind making the app responsive to user input like button taps.",
+      "code_blocks": []
+    },
+    {
+      "title": "View.OnClickListener Interface & Activity Implementation",
+      "summary": "Trình bày cách định nghĩa một Activity implements View.OnClickListener để xử lý sự kiện click. Phương thức onClick cần được ghi đè (override). Context: Đây là cách tiếp cận 'truyền thống' (trước khi có SAM conversions) để kết nối sự kiện giao diện người dùng với logic xử lý, được nhắc đến ở phần trước.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "class MainActivity : AppCompatActivity(), View.OnClickListener {\noverride fun onCreate(savedInstanceState: Bundle?) {\n...\nval button: Button = findViewById(R.id.button)\nbutton.setOnClickListener(this)\n}\noverride fun onClick(v: View?) {\nTODO(\"not implemented\")\n}\n}",
+          "explanation": "MainActivity triển khai interface View.OnClickListener. 'button.setOnClickListener(this)' đăng ký Activity hiện tại làm listener. Khi button được bấm, phương thức 'onClick' của Activity sẽ được gọi."
+        }
+      ]
+    },
+    {
+      "title": "SAM (Single Abstract Method) Conversions",
+      "summary": "Giải thích khái niệm SAM trong Kotlin: chuyển đổi một Lambda expression thành implementation của Interface có duy nhất một phương thức trừu tượng. Context: Kotlin cung cấp cú pháp gọn hơn so với việc tạo Anonymous Inner Class (object : Interface) thường thấy trong Java.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val runnable = Runnable { println(\"Hi there\") }",
+          "explanation": "Đoạn code này tương đương với việc tạo object implements Runnable và ghi đè phương thức run(), nhưng viết ngắn gọn hơn nhờ SAM conversion."
+        }
+      ]
+    },
+    {
+      "title": "Cách viết Listener hiện đại với SAM",
+      "summary": "Áp dụng SAM conversion cho View.OnClickListener. Thay vì passing 'this' (interface implementation), ta có thể passing một Lambda expression trực tiếp vào setOnClickListener.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "button.setOnClickListener({ view -> /* do something*/ })",
+          "explanation": "Sử dụng Lambda để xử lý click ngay tại nơi gọi, giúp code gọn gang và dễ đọc hơn."
+        }
+      ]
+    },
+    {
+      "title": "Late Initialization (lateinit)",
+      "summary": "Giải quyết vấn đề biến chưa được khởi tạo ngay tại thời điểm khai báo. Dùng cho các biến sẽ được khởi tạo sau (ví dụ: trong onCreate), tránh phải dùng nullable types (có dấu '?') hoặc các biến giả (dummy values).",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "lateinit var records: HashSet<Any>",
+          "explanation": "Khai báo biến records mà không cần gán giá trị ban đầu. Phải gán giá trị trước khi sử dụng biến này."
+        }
+      ]
+    },
+    {
+      "title": "Sử dụng Lateinit trong Activity",
+      "summary": "Minh họa practical usage của lateinit trong Android: khai báo các View (như TextView) mà không cần gán giá trị null ban đầu, và gán giá trị thực tế trong phương thức onCreate.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "class MainActivity : AppCompatActivity() {\nlateinit var result: TextView\noverride fun onCreate(savedInstanceState: Bundle?) {\n...\nresult = findViewById(R.id.result_text_view)\n}\n}",
+          "explanation": "Biến result được khai báo lateinit. Việc tìm view và gán vào biến này diễn ra trong onCreate, giúp code sạch sẽ hơn."
+        }
+      ]
+    },
+    {
+      "title": "Giới thiệu Gradle",
+      "summary": "Khái niệm cơ bản về Gradle. Nó là một hệ thống build automation, quản lý chu trình build (tasks), thứ tự thực thi và các dependency (phụ thuộc) của dự án Android.",
+      "code_blocks": []
+    },
+    {
+      "title": "Cấu trúc file build của Gradle",
+      "summary": "Các thành phần chính trong file build.gradle: Declaration plugins, Android properties, Dependencies, Repositories.",
+      "code_blocks": [
+        {
+          "language": "Gradle",
+          "code": "apply plugin: 'com.android.application'\napply plugin: 'kotlin-android'\napply plugin: 'kotlin-android-extensions'",
+          "explanation": "Khai báo các Plugin cần thiết để build một ứng dụng Android sử dụng Kotlin."
+        },
+        {
+          "language": "Gradle",
+          "code": "android {\ncompileSdkVersion 30\nbuildToolsVersion \"30.0.2\"\ndefaultConfig {\napplicationId \"com.example.sample\"\nminSdkVersion 19\ntargetSdkVersion 30\n}\n}",
+          "explanation": "Đoạn cấu hình thông số Android SDK và phiên bản build."
+        }
+      ]
+    },
+    {
+      "title": "Dependencies Configuration",
+      "summary": "This section shows the 'dependencies' block in the build.gradle file, which is a continuation from the previous context. It defines the libraries required for the project, such as Kotlin standard libraries and AndroidX components (Core, AppCompat, Material).",
+      "code_blocks": [
+        {
+          "language": "Groovy",
+          "code": "dependencies {\nimplementation \"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version\"\nimplementation 'androidx.core:core-ktx:1.3.2'\nimplementation 'androidx.appcompat:appcompat:1.2.0'\nimplementation 'com.google.android.material:material:1.2.1'\n...\n}",
+          "explanation": "Declares external libraries needed for the app to compile and run, including Kotlin extensions and Android UI libraries."
+        }
+      ]
+    },
+    {
+      "title": "Repositories Configuration",
+      "summary": "This section displays the 'repositories' block in the build.gradle file. It specifies the sources from which Gradle should download the dependencies defined in the previous section (Google's Maven repo and Maven Central).",
+      "code_blocks": [
+        {
+          "language": "Groovy",
+          "code": "repositories {\ngoogle()\nmavenCentral()\n}",
+          "explanation": "Configures the repositories where Gradle looks for the libraries specified in the dependencies block."
+        }
+      ]
+    },
+    {
+      "title": "Common Gradle Tasks",
+      "summary": "Lists standard command-line tasks used to manage the build lifecycle of an Android project. These are used to clean the project, view available tasks, or build and install the debug version of the app.",
+      "code_blocks": []
+    },
+    {
+      "title": "Introduction to Accessibility",
+      "summary": "Defines Accessibility in the context of Android development. It emphasizes that designing apps to be usable by people with disabilities improves the overall user experience for everyone.",
+      "code_blocks": []
+    },
+    {
+      "title": "Strategies to Improve Accessibility",
+      "summary": "Provides specific guidelines for making apps more accessible: ensuring high contrast ratios for text (4.5:1 for small text, 3:1 for large text), using large touch targets (at least 48dp x 48dp), and providing descriptions for UI elements.",
+      "code_blocks": []
+    },
+    {
+      "title": "Accessibility Scanner Tool",
+      "summary": "Introduces the 'Accessibility Scanner' tool. This tool analyzes the screen to suggest improvements based on content labels, touch target sizes, and color contrast.",
+      "code_blocks": []
+    },
+    {
+      "title": "Implementing Content Labels",
+      "summary": "Explains how to make UI elements accessible to screen readers by using the 'contentDescription' attribute on ImageView or controls. It notes that TextViews are accessible by default and that decorative elements should use 'importantForAccessibility=\"no\"' to avoid cluttering the screen reader experience.",
+      "code_blocks": [
+        {
+          "language": "XML",
+          "code": "<ImageView\n...\nandroid:contentDescription=\"@string/stop_sign\" />",
+          "explanation": "Sets a description for an image so screen readers can announce it to visually impaired users."
+        },
+        {
+          "language": "XML",
+          "code": "android:importantForAccessibility=\"no\"",
+          "explanation": "Marks a view as decorative, telling screen readers to ignore it to prevent unnecessary noise for the user."
+        }
+      ]
+    },
+    {
+      "title": "TalkBack Screen Reader",
+      "summary": "Introduces TalkBack as the default Google screen reader on Android devices. It explains that TalkBack provides spoken feedback for eyes-free operation and allows navigation via gestures. This concept directly applies the previous lesson's context: the 'contentDescription' attributes and accessibility settings developers implement are designed to be read by tools like TalkBack.",
+      "code_blocks": []
+    },
+    {
+      "title": "Switch Access",
+      "summary": "Explains Switch Access, an alternative input method allowing users to control the device using physical switches or buttons (e.g., volume keys) instead of the touchscreen. It highlights that this tool scans the UI and highlights items sequentially for selection, emphasizing the need for a logical navigation order in the app's layout.",
+      "code_blocks": []
+    },
+    {
+      "title": "Android Accessibility Suite",
+      "summary": "Lists the components included in the Android Accessibility Suite (TalkBack, Switch Access, Accessibility Menu, Select to Speak). This reinforces that 'accessibility' is not a single feature but a suite of tools that interact with the app's metadata (like content descriptions) to assist users.",
+      "code_blocks": []
+    },
+    {
+      "title": "Accessibility Resources and Summary",
+      "summary": "Provides pointers to external resources (Codelabs, Material Design) for further learning. The summary of 'Lesson 4' consolidates the scope of UI building, covering Views, ViewGroups, Resources (R class), Activity logic, Gradle, and specifically 'best practices to make your apps more accessible'. This serves as the capstone for the technical concepts introduced earlier.",
+      "code_blocks": []
+    }
+  ]
+}

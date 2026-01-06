@@ -1,0 +1,17 @@
+{
+  "file": "test_sample.pdf",
+  "total_pages": 1,
+  "analysis_merged": [
+    {
+      "title": "Introduction",
+      "summary": "The document introduces the concept by displaying a greeting and lists the first lesson as an introduction. It includes a sample code snippet typical for starting a programming tutorial.",
+      "code_blocks": [
+        {
+          "language": "Java",
+          "code": "System.out.println('Hello World');",
+          "explanation": "This is a basic Java statement used to print the text 'Hello World' to the console, often used as a first step in learning the language."
+        }
+      ]
+    }
+  ]
+}

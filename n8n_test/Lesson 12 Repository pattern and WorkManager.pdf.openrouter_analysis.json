@@ -1,0 +1,150 @@
+{
+  "file": "Lesson 12 Repository pattern and WorkManager.pdf",
+  "total_pages": 33,
+  "analysis_merged": [
+    {
+      "title": "Repository Pattern Overview",
+      "summary": "This section introduces the Repository pattern as a design architecture to manage data sources. It emphasizes the need to handle varying data speeds (RAM, Disk, Network) and the importance of caching network responses to ensure app responsiveness. The repository acts as an intermediary, abstracting data sources (like Room databases or remote APIs) from the UI layer, allowing for easier testing and data synchronization.",
+      "code_blocks": []
+    },
+    {
+      "title": "WorkManager Introduction",
+      "summary": "This section marks the beginning of the topic regarding WorkManager. While the text provided cuts off, the context suggests this is the start of a module explaining how to handle background processing tasks in Android development using Kotlin.",
+      "code_blocks": []
+    },
+    {
+      "title": "Giới thiệu và Khái niệm cơ bản về WorkManager",
+      "summary": "WorkManager là một thành phần của Android Jetpack, được khuyến nghị để xử lý các tác vụ nền (background work), bao gồm cả tác vụ tức thời (immediate) và hoãn lại (deferred). Nó đảm bảo thực thi (guaranteed execution) và có thể hoạt động dựa trên các điều kiện (opportunistic).",
+      "code_blocks": []
+    },
+    {
+      "title": "Khi nào sử dụng WorkManager",
+      "summary": "Biểu đồ quyết định dựa trên hai tiêu chí: Tác vụ có cần người dùng hoạt động (Requires active user) không và Tác vụ có cần chạy đúng giờ (Must run at exact time) không. WorkManager phù hợp với các tác vụ 'Deferred' (hoãn lại) và không yêu cầu người dùng hoạt động.",
+      "code_blocks": []
+    },
+    {
+      "title": "Thiết lập dependencies",
+      "summary": "Cần khai báo thư viện work-runtime-ktx trong file build.gradle để sử dụng WorkManager với Kotlin.",
+      "code_blocks": [
+        {
+          "language": "Groovy",
+          "code": "implementation \"androidx.work:work-runtime-ktx:$work_version\"",
+          "explanation": "Khai báo dependency cho WorkManager với hỗ trợ Kotlin Coroutines."
+        }
+      ]
+    },
+    {
+      "title": "Các lớp (Classes) quan trọng",
+      "summary": "Cần nắm vững các lớp chính: Worker (thực thi công việc), WorkRequest (yêu cầu thực thi), Constraint (điều kiện ràng buộc), và WorkManager (lên lịch và quản lý).",
+      "code_blocks": []
+    },
+    {
+      "title": "Định nghĩa Worker cơ bản",
+      "summary": "Để tạo Worker, tạo một lớp kế thừa từ Worker và ghi đè phương thức doWork(). Phương thức này chạy trên nền thread riêng và trả về Result (success, failure, hoặc retry).",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "class UploadWorker(appContext: Context, workerParams: WorkerParameters) :\n    Worker(appContext, workerParams) {\n    override fun doWork(): Result {\n        // Do the work here. In this case, upload the images.\n        uploadImages()\n        // Indicate whether work finished successfully with the Result\n        return Result.success()\n    }\n}",
+          "explanation": "Lớp UploadWorker kế thừa từ Worker, ghi đè doWork() để thực hiện logic tải ảnh và trả về Result.success()."
+        }
+      ]
+    },
+    {
+      "title": "Sử dụng CoroutineWorker",
+      "summary": "Để tận dụng Kotlin Coroutines, nên kế thừa từ CoroutineWorker thay vì Worker. Phương thức doWork() cần được đánh dấu là suspend.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "class UploadWorker(appContext: Context, workerParams: WorkerParameters) :\n    CoroutineWorker(appContext, workerParams) {\n    override suspend fun doWork(): Result {\n        // Do the work here (in this case, upload the images)\n        uploadImages()\n        // Indicate whether work finished successfully with the Result\n        return Result.success()\n    }\n}",
+          "explanation": "Lớp UploadWorker kế thừa từ CoroutineWorker, cho phép thực thi tác vụ nền bất đồng bộ (asynchronous) bằng cách sử dụng suspend function."
+        }
+      ]
+    },
+    {
+      "title": "Loại WorkRequest",
+      "summary": "Có hai loại WorkRequest: OneTimeWorkRequest (chạy một lần) và PeriodicWorkRequest (lặp lại). Chúng được lưu trữ Persistence và có thể xếp hàng (chain) chạy tuần tự hoặc song song.",
+      "code_blocks": []
+    },
+    {
+      "title": "Lên lịch OneTimeWorkRequest",
+      "summary": "Quy trình gồm hai bước: Xây dựng Request bằng OneTimeWorkRequestBuilder và thêm vào hàng đợi WorkManager bằng phương thức enqueue.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val uploadWorkRequest: WorkRequest =\n    OneTimeWorkRequestBuilder<UploadWorker>()\n        .build()\nWorkManager.getInstance(myContext)\n    .enqueue(uploadWorkRequest)",
+          "explanation": "Tạo OneTimeWorkRequest cho UploadWorker và.enqueue nó vào WorkManager để thực thi."
+        }
+      ]
+    },
+    {
+      "title": "Lên lịch PeriodicWorkRequest và Flex Interval",
+      "summary": "Đối với tác vụ định kỳ, cần đặt khoảng thời gian lặp lại (interval) và tùy chọn khoảng thời gian linh hoạt (flex interval). Flex interval xác định cửa sổ thời gian mà tác vụ có thể được thực thi trong mỗi chu kỳ.",
+      "code_blocks": []
+    },
+    {
+      "title": "Periodic Work Execution and Flex Interval",
+      "summary": "Trình bày cách tạo tác vụ định kỳ sử dụng PeriodicWorkRequestBuilder với các tham số repeatInterval và flexInterval. Flex interval được xác định để cho phép tác vụ chạy linh hoạt trong một cửa sổ thời gian, giúp tối ưu hóa tài nguyên pin (ví dụ: 1 giờ lặp lại + 15 phút linh hoạt).",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val repeatingRequest = PeriodicWorkRequestBuilder<RefreshDataWorker>(\n1, TimeUnit.HOURS, // repeatInterval\n15, TimeUnit.MINUTES // flexInterval\n).build()",
+          "explanation": "Tạo một yêu cầu công việc định kỳ lặp lại sau mỗi 1 giờ, với cửa sổ linh hoạt 15 phút để thực thi."
+        }
+      ]
+    },
+    {
+      "title": "Enqueue Periodic Work và Chính sách xử lý",
+      "summary": "Sử dụng phương thức enqueueUniquePeriodicWork để đăng ký tác vụ. Đề cập đến chính sách ExistingPeriodicWorkPolicy (KEEP hoặc REPLACE) để xác định hành vi khi tác vụ với cùng tên (Unique Name) đã tồn tại trong hàng đợi.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "WorkManager.getInstance().enqueueUniquePeriodicWork(\n\"Unique Name\",\nExistingPeriodicWorkPolicy.KEEP, // or REPLACE\nrepeatingRequest\n)",
+          "explanation": "Đăng ký tác vụ định kỳ vào WorkManager với chính sách giữ lại (KEEP) tác vụ cũ nếu đã tồn tại."
+        }
+      ]
+    },
+    {
+      "title": "Truyền dữ liệu Input và Output cho Worker",
+      "summary": "Giải thích cách Worker nhận dữ liệu đầu vào (InputData) và trả về dữ liệu đầu ra (OutputData). Ví dụ MathWorker tính toán dựa trên tham số nhận được và trả kết quả.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "class MathWorker(context: Context, params: WorkerParameters):\nCoroutineWorker(context, params) {\noverride suspend fun doWork(): Result {\nval x = inputData.getInt(KEY_X_ARG, 0)\nval y = inputData.getInt(KEY_Y_ARG, 0)\nval result = computeMathFunction(x, y)\nval output: Data = workDataOf(KEY_RESULT to result)\nreturn Result.success(output)\n}\n}",
+          "explanation": "Worker nhận dữ liệu từ inputData, xử lý logic tính toán và trả về kết quả bằng Result.success(output)."
+        }
+      ]
+    },
+    {
+      "title": "Thiết lập Input Data cho WorkRequest",
+      "summary": "Hướng dẫn cách đính kèm dữ liệu đầu vào vào WorkRequest trước khi enqueue bằng phương thức setInputData và workDataOf.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val complexMathWork = OneTimeWorkRequest<MathWorker>()\n.setInputData(\nworkDataOf(\n\"X_ARG\" to 42,\n\"Y_ARG\" to 421,\n)\n).build()",
+          "explanation": "Tạo WorkRequest một lần và thiết lập dữ liệu đầu vào (42 và 421) để truyền vào MathWorker."
+        }
+      ]
+    },
+    {
+      "title": "Ràng buộc (Constraints) thực thi tác vụ",
+      "summary": "Liệt kê các điều kiện có thể áp dụng cho WorkRequest như mạng, pin, sạc, và chế độ chờ (idle). Các ràng buộc này dùng để đảm bảo tác vụ chỉ chạy khi hệ thống thỏa mãn điều kiện.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val constraints = Constraints.Builder()\n.setRequiredNetworkType(NetworkType.UNMETERED)\n.setRequiresCharging(true)\n.setRequiresBatteryNotLow(true)\n.setRequiresDeviceIdle(true)\n.build()\nval myWorkRequest: WorkRequest = OneTimeWorkRequestBuilder<MyWork>()\n.setConstraints(constraints)\n.build()",
+          "explanation": "Xây dựng các ràng buộc (Constraints) yêu cầu mạng không giới hạn, thiết bị đang sạc, pin không thấp và ở chế độ chờ, sau đó áp dụng vào WorkRequest."
+        }
+      ]
+    },
+    {
+      "title": "Tổng kết và Lộ trình Bài học (Lesson 12)",
+      "summary": "Phần này là bảng tóm tắt kiến thức của Lesson 12, tập trung vào hai chủ đề chính: 'Repository pattern' và 'WorkManager'. Nó liệt kê các kỹ năng học viên cần nắm vững:\n1. Sử dụng Repository để trừu tượng hóa lớp dữ liệu (Data Layer).\n2. Lên lịch và tối ưu hóa tác vụ nền bằng WorkManager (đây là nội dung nối tiếp từ ràng buộc tác vụ ở trang 31).\n3. Tạo Worker classes tùy chỉnh và WorkRequest (một lần hoặc định kỳ).\nPhần 'Learn more' làm rõ các hành động cụ thể như lấy dữ liệu, kết nối ViewModel với Repository và sử dụng WorkManager để thực thi nền ngay lập tức.",
+      "code_blocks": []
+    },
+    {
+      "title": "Tài nguyên Thực hành",
+      "summary": "Phần 'Pathway' khuyến khích người học củng cố kiến thức bằng cách hoàn thành bài tập thực hành (practice pathway) cho Lesson 12 về Repository và WorkManager.",
+      "code_blocks": []
+    }
+  ]
+}

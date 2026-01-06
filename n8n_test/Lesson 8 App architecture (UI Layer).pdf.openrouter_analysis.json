@@ -1,0 +1,223 @@
+{
+  "file": "Lesson 8 App architecture (UI Layer).pdf",
+  "total_pages": 42,
+  "analysis_merged": [
+    {
+      "title": "Android App Architecture - Introduction and Core Principles",
+      "summary": "This section introduces the importance of app architecture on Android. It warns against 'short-term hacks' like placing all logic in Activities, copying code blindly, or hardcoding strings. It emphasizes that good architecture (separation of concerns) leads to maintainability, easier testing, and collaboration. It mentions Android Jetpack libraries and the MVVM/MVI patterns as solutions to organize code structure.",
+      "code_blocks": []
+    },
+    {
+      "title": "UI Layer Architecture Components",
+      "summary": "This section defines the components of the UI layer. It outlines the relationship between the UI Controller (Activity/Fragment), the ViewModel, LiveData, and the Data Layer. It introduces the ViewModel as the next specific topic.",
+      "code_blocks": []
+    },
+    {
+      "title": "Cấu hình và Dependency",
+      "summary": "Phần này hướng dẫn cấu hình Gradle để sử dụng ViewModel. Nó thêm các thư viện `lifecycle-viewmodel-ktx` và `activity-ktx`, cho phép truy cập ViewModel dễ dàng trong Activity bằng `by viewModels()`.",
+      "code_blocks": [
+        {
+          "language": "Gradle",
+          "code": "dependencies {\nimplementation \"androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version\"\nimplementation \"androidx.activity:activity-ktx:$activity_version\"\n}",
+          "explanation": "Thêm dependencies cần thiết để sử dụng ViewModel và KTX (Kotlin Extensions) trong ứng dụng Android."
+        }
+      ]
+    },
+    {
+      "title": "Khái niệm ViewModel",
+      "summary": "Giới thiệu các đặc điểm chính của ViewModel: prepare dữ liệu cho UI, không tham chiếu UI Controller (Activity/Fragment) trực tiếp, có scope theo vòng đời (lifecycle), sống sót qua các thay đổi cấu hình (configuration changes) và tồn tại chừng nào scope của nó còn sống.",
+      "code_blocks": []
+    },
+    {
+      "title": "Vòng đời của ViewModel",
+      "summary": "Phần này mô tả trực quan vòng đời của ViewModel, minh họa qua slide 'Kabaddi Kounter', cho thấy ViewModel được tạo khi Activity được khởi tạo và được giữ lại cho đến khi Activity bị hủy hoàn toàn (finish).",
+      "code_blocks": []
+    },
+    {
+      "title": "Cài đặt lớp ViewModel",
+      "summary": "Phân tích cách định nghĩa một lớp ViewModel bằng Kotlin. Lớp `ScoreViewModel` kế thừa từ `ViewModel` và chứa logic nghiệp vụ (tăng điểm) cùng với trạng thái dữ liệu (`scoreA`, `scoreB`)",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "class ScoreViewModel : ViewModel() {\nvar scoreA : Int = 0\nvar scoreB : Int = 0\nfun incrementScore(isTeamA: Boolean) {\nif (isTeamA) {\nscoreA++\n}\nelse {\nscoreB++\n}\n}\n}",
+          "explanation": "Định nghĩa lớp ViewModel để quản lý điểm số. Nó chứa các biến trạng thái và hàm xử lý logic thay đổi dữ liệu."
+        }
+      ]
+    },
+    {
+      "title": "Tải và sử dụng ViewModel trong Activity",
+      "summary": "Phần này minh họa cách Activity (`MainActivity`) lấy instance của ViewModel bằng delegate `by viewModels()` và cập nhật UI ban đầu trong `onCreate`.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "class MainActivity : AppCompatActivity() {\n// Delegate provided by androidx.activity.viewModels\nval viewModel: ScoreViewModel by viewModels()\noverride fun onCreate(savedInstanceState: Bundle?) {\n...\nval scoreViewA: TextView = findViewById(R.id.scoreA)\nscoreViewA.text = viewModel.scoreA.toString()\n}",
+          "explanation": "Sử dụng `by viewModels()` để khởi tạo và truy cập ViewModel. Hiển thị giá trị điểm số ban đầu từ ViewModel lên TextView."
+        }
+      ]
+    },
+    {
+      "title": "Xử lý sự kiện với ViewModel",
+      "summary": "Phần này cho thấy cách liên kết sự kiện click của nút với ViewModel. Khi người dùng nhấn nút, hàm `incrementScore` của ViewModel được gọi, sau đó UI được cập nhật thủ công để hiển thị giá trị mới.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val scoreViewA: TextView = findViewById(R.id.scoreA)\nval plusOneButtonA: Button = findViewById(R.id.plusOne_teamA)\nplusOneButtonA.setOnClickListener {\nviewModel.incrementScore(true)\nscoreViewA.text = viewModel.scoreA.toString()\n}",
+          "explanation": "Bắt sự kiện click, gọi phương thức của ViewModel để thay đổi dữ liệu, và cập nhật TextView để phản ánh thay đổi đó."
+        }
+      ]
+    },
+    {
+      "title": "Data Binding và ViewModel",
+      "summary": "So sánh kiến trúc ứng dụng khi sử dụng Data Binding so với không sử dụng. Khi không dùng Data Binding, UI Controller (Activity) phải quản lý Views và xử lý sự kiện. Khi dùng Data Binding, Views giao tiếp trực tiếp với ViewModel.",
+      "code_blocks": []
+    },
+    {
+      "title": "Kết nối ViewModel với Data Binding trong XML",
+      "summary": "Phần này giải thích cách khai báo ViewModel bên trong layout XML sử dụng thẻ <data> và <variable>. Đây là bước cấu trúc để tạo cầu nối giữa giao diện (View) và logic (ViewModel), cho phép truy cập trực tiếp thuộc tính ViewModel từ XML.",
+      "code_blocks": [
+        {
+          "language": "XML",
+          "code": "<layout>\n<data>\n<variable>\nname=\"viewModel\"\ntype=\"com.example.kabaddikounter.ScoreViewModel\" />\n</data>\n<ConstraintLayout ../>\n</layout>",
+          "explanation": "Định nghĩa một biến 'viewModel' trong layout, cho phép file XML sử dụng thuộc tính của ScoreViewModel."
+        }
+      ]
+    },
+    {
+      "title": "Gắn kết ViewModel với Activity trong Data Binding",
+      "summary": "Tại Activity (UI Controller), ViewModel được khởi tạo và gán vào binding object. Bài học ở đây là thứ tự thực hiện: Khởi tạo Activity -> Tạo binding -> Gán ViewModel vào binding.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "class MainActivity : AppCompatActivity() {\n    val viewModel: ScoreViewModel by viewModels()\n    override fun onCreate(savedInstanceState: Bundle?) {\n        super.onCreate(savedInstanceState)\n        val binding: ActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)\n        binding.viewModel = viewModel\n        ...\n    }\n}",
+          "explanation": "Khởi tạo ViewModel bằng delegate 'by viewModels()' và gán instance đó vào thuộc tính 'viewModel' của binding object để XML có thể sử dụng."
+        }
+      ]
+    },
+    {
+      "title": "Tham chiếu dữ liệu từ XML",
+      "summary": "Sử dụng cú pháp binding '@{...}' trong file XML để hiển thị dữ liệu từ ViewModel một cách động.",
+      "code_blocks": [
+        {
+          "language": "XML",
+          "code": "<TextView\nandroid:id=\"@+id/scoreViewA\"\nandroid:text=\"@{viewModel.scoreA.toString()}\" />",
+          "explanation": "Ánh xạ trực tiếp thuộc tính 'scoreA' của ViewModel vào thuộc tính text của TextView, tự động chuyển đổi về String."
+        }
+      ]
+    },
+    {
+      "title": "Xử lý sự kiện Click và Cập nhật UI thủ công",
+      "summary": "Minh họa cách xử lý sự kiện người dùng (click) để gọi method trong ViewModel và sau đó buộc phải cập nhật UI (text view) thủ công nếu không sử dụng LiveData/Observable.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "override fun onCreate(savedInstanceState: Bundle?) {\n    ...\n    binding.plusOneButtonA.setOnClickListener {\n        viewModel.incrementScore(true)\n        binding.scoreViewA.text = viewModel.scoreA.toString()\n    }\n}",
+          "explanation": "Khi button được click, gọi method logic 'incrementScore' và sau đó cập nhật lại text của TextView bằng cách thủ công lấy giá trị mới từ ViewModel."
+        }
+      ]
+    },
+    {
+      "title": "Mẫu quan sát (Observer Design Pattern)",
+      "summary": "Giải thích lý thuyết về mô hình Observer bao gồm Subject (đối tượng được theo dõi) và Observers (đối tượng quan sát). Đây là nền tảng cho LiveData.",
+      "code_blocks": [],
+      "detail": "Subject duy trì danh sách observers và thông báo khi trạng thái thay đổi. Observers nhận thông báo và thực thi code phù hợp."
+    },
+    {
+      "title": "Khái niệm và Tính năng của LiveData",
+      "summary": "Giới thiệu LiveData như một wrapper dữ liệu aware với lifecycle, thường được dùng trong ViewModel. Nó cho phép các Observer (Activity/Fragment) đăng ký theo dõi thay đổi.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "observe(owner: LifecycleOwner, observer: Observer)\nremoveObserver(observer: Observer)",
+          "explanation": "Các phương thức chính để đăng ký và hủy đăng ký quan sát LiveData, gắn liền với vòng đời (LifecycleOwner) của UI."
+        }
+      ]
+    },
+    {
+      "title": "So sánh LiveData và MutableLiveData",
+      "summary": "Phân biệt giữa LiveData (chỉ đọc) và MutableLiveData (có thể sửa đổi). LiveData chỉ expose phương thức getValue(), trong khi MutableLiveData expose thêm setValue() và postValue().",
+      "code_blocks": [],
+      "detail": "MutableLiveData là subclass của LiveData cho phép thay đổi giá trị, thường được giữ kín trong ViewModel và được expose dưới dạng LiveData_read-only bên ngoài."
+    },
+    {
+      "title": "Cách sử dụng LiveData trong ViewModel",
+      "summary": "Mô hình chuẩn khi implement LiveData trong ViewModel: biến private MutableLiveDate và biến public LiveData read-only (read-only property).",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "class ScoreViewModel : ViewModel() {\n    private val _scoreA = MutableLiveData<Int>(0)\n    val scoreA: LiveData<Int>\n        get() = _scoreA\n    fun incrementScore(isTeamA: Boolean) {\n        if (isTeamA) {\n            _scoreA.value = _scoreA.value!! + 1\n        }\n        ...\n    }\n}",
+          "explanation": "Mô hình 'Backing Property': '_scoreA' là biến nội bộ để ghi dữ liệu (MutableLiveData), 'scoreA' là biến public để UI quan sát (LiveData)."
+        }
+      ]
+    },
+    {
+      "title": "Basic LiveData Observer Pattern Implementation",
+      "summary": "This section illustrates the fundamental way to update the UI using an observer. It connects the ViewModel's LiveData to the Activity. The click listener updates the ViewModel's internal data, triggering the observer, which then updates the TextView. This matches the context: keeping a private MutableLiveDate and public LiveData in the ViewModel.",
+      "code_blocks": [
+        {
+          "language": "kotlin",
+          "code": "binding.plusOneButtonA.setOnClickListener {\n    viewModel.incrementScore(true)\n}\nval scoreA_Observer = Observer<Int> { newValue ->\n    binding.scoreViewA.text = newValue.toString()\n}\nviewModel.scoreA.observe(this, scoreA_Observer)",
+          "explanation": "Sets up a click listener to change ViewModel data. It creates an Observer that updates the text view and registers it to the ViewModel's LiveData."
+        }
+      ]
+    },
+    {
+      "title": "Two-way Data Binding Concept",
+      "summary": "Introduces the concept of two-way data binding as an alternative to manual observers. By binding LiveData directly in the XML, the code removes the need for explicit observers in the Activity/Fragment.",
+      "code_blocks": []
+    },
+    {
+      "title": "Two-way Data Binding Implementation (XML)",
+      "summary": "Demonstrates the layout XML configuration required for data binding. It includes a <data> section to define the ViewModel variable and binds the TextView's text directly to the ViewModel's LiveData in an expression.",
+      "code_blocks": [
+        {
+          "language": "xml",
+          "code": "<layout>\n<data>\n<variable>\n    name=\"viewModel\"\n    type=\"com.example.kabaddikounter.ScoreViewModel\" />\n</data>\n<ConstraintLayout ..>\n<TextView ...\n    android:id=\"@+id/scoreViewA\"\n    android:text=\"@{viewModel.scoreA.toString()}\" />\n...\n</ConstraintLayout>\n</layout>",
+          "explanation": "Defines the ViewModel variable and binds the scoreA LiveData to the TextView text attribute using an expression."
+        }
+      ]
+    },
+    {
+      "title": "Two-way Data Binding Implementation (Activity)",
+      "summary": "Shows the Activity code to enable data binding. Key steps include setting the content view via DataBindingUtil, assigning the ViewModel to the binding variable, and crucially, setting the lifecycleOwner to allow LiveData observation.",
+      "code_blocks": [
+        {
+          "language": "kotlin",
+          "code": "class MainActivity : AppCompatActivity() {\n    val viewModel: ScoreViewModel by viewModels()\n    override fun onCreate(savedInstanceState: Bundle?) {\n        super.onCreate(savedInstanceState)\n        val binding: ActivityMainBinding = DataBindingUtil\n            .setContentView(this, R.layout.activity_main)\n        binding.viewModel = viewModel\n        binding.lifecycleOwner = this\n        binding.plusOneButtonA.setOnClickListener {\n            viewModel.incrementScore(true)\n        }\n        ...\n    }\n}",
+          "explanation": "Initializes Data Binding, links the ViewModel instance to the binding object, and sets the lifecycle owner to ensure LiveData updates are received."
+        }
+      ]
+    },
+    {
+      "title": "ViewModel for Data Binding",
+      "summary": "Reiterates the ViewModel structure. It maintains private mutable LiveData for internal updates and exposes immutable LiveData publicly via getters. The logic handles score incrementation.",
+      "code_blocks": [
+        {
+          "language": "kotlin",
+          "code": "class ScoreViewModel : ViewModel() {\n    private val _scoreA = MutableLiveData<Int>(0)\n    val scoreA : LiveData<Int>\n        get() = _scoreA\n    private val _scoreB = MutableLiveData<Int>(0)\n    val scoreB : LiveData<Int>\n        get() = _scoreB\n    fun incrementScore(isTeamA: Boolean) {\n        if (isTeamA) {\n            _scoreA.value = _scoreA.value!! + 1\n        } else {\n            _scoreB.value = _scoreB.value!! + 1\n        }\n    }\n}",
+          "explanation": "ViewModel encapsulates score data using the private mutable / public immutable pattern and exposes a function to modify the data."
+        }
+      ]
+    },
+    {
+      "title": "Transforming LiveData",
+      "summary": "Introduces the ability to manipulate LiveData before observing it. It lists 'map' and 'switchMap' as primary tools for this. This allows derived data states without modifying the original source.",
+      "code_blocks": [
+        {
+          "language": "kotlin",
+          "code": "val result: LiveData<String> = Transformations.map(viewModel.scoreA) { x -> if (x > 10) \"A Wins\" else \"\" }",
+          "explanation": "Uses Transformations.map to create a new LiveData that emits a string 'A Wins' when the original score exceeds 10, otherwise an empty string."
+        }
+      ]
+    },
+    {
+      "title": "Lesson Summary",
+      "summary": "Recaps the key takeaways of the module: adherence to separation of concerns using ViewModel, using data binding to reduce boilerplate code, and utilizing LiveData observers to create a reactive UI.",
+      "code_blocks": []
+    },
+    {
+      "title": "Tài liệu tham khảo và Lộ trình học tập (Learn More & Pathway)",
+      "summary": "Phần này là tài liệu tham khảo bổ sung và bài tập thực hành, nhằm củng cố các kiến thức đã học ở các phần trước. Dựa vào ngữ cảnh 'Recaps' (tổng kết) ở phần trước, tài liệu này liệt kê các nguồn官方 (như Guide to app architecture, ViewModel Overview) để người học tìm hiểu sâu hơn về kiến trúc MVVM, ViewModel và LiveData. Đồng thời, đề xuất một bài tập cụ thể (Lesson 8: App architecture (UI layer)) để thực hành các nguyên tắc đã học.",
+      "code_blocks": []
+    }
+  ]
+}
