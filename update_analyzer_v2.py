@@ -1,4 +1,7 @@
-#!/usr/bin/env python3
+
+import os
+
+new_code = r'''#!/usr/bin/env python3
 """
 openrouter_pdf_analyzer.py
 
@@ -22,7 +25,7 @@ DEFAULT_FOLDERS_TO_SCAN = [
     r"E:\n8n-ngrok\web_slide"
 ]
 
-OPENROUTER_API_KEY = "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"
+OPENROUTER_API_KEY = "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"
 MODEL = "xiaomi/mimo-v2-flash:free"
 CHUNK_SIZE = 10
 URL = "https://openrouter.ai/api/v1/chat/completions"
@@ -30,7 +33,6 @@ HEADERS = {
     "Authorization": f"Bearer {OPENROUTER_API_KEY}",
     "Content-Type": "application/json",
     "HTTP-Referer": "http://localhost:5000",
-    "X-Title": "Local PDF Analyzer",
 }
 
 def extract_text_from_pdf(path):
@@ -50,11 +52,13 @@ def chunk_pages(pages, size):
     for i in range(0, len(pages), size):
         yield pages[i:i + size], i + 1
 
-def build_prompt(chunk_text, start_page, previous_concepts=None, topic="the provided material"):
+def build_prompt(chunk_text, start_page, previous_concepts=None):
     prev_concepts_str = previous_concepts if previous_concepts else "None"
     return f"""
 You are a SENIOR SOFTWARE ENGINEER and TECHNICAL INSTRUCTOR.
-Your task is to produce a **DEVELOPER DECISION GUIDE** for {topic} that can be:
+
+Your task is to produce a **DEVELOPER DECISION GUIDE**
+for Kotlin Coroutines (or the specific topic in the text) that can be:
 - Printed as slides
 - Brought into an exam room
 - Used as a quick reference while coding
@@ -64,71 +68,62 @@ IMPORTANT RULES
 ========================
 - DO NOT summarize like a textbook.
 - DO NOT repeat the same concept multiple times.
-- MERGE duplicated or overlapping concepts.
-- TECHNICAL TERMS, APIs, and KEYWORDS: Keep in ENGLISH but MUST follow with a VIETNAMESE explanation (e.g., "Coroutine (Tiến trình rút gọn)").
-- ALL EXPLANATIONS: MUST be in VIETNAMESE.
-- CODE DEMOS: Provide minimal but COMPLETE code examples for EVERY technical concept or pattern discussed.
+- TRULY MERGE or OMIT duplicated concepts if they were listed in "Previously covered concepts".
+- KEEP ALL technical terms, APIs, and keywords in ENGLISH.
+- ALL explanations MUST be in VIETNAMESE.
 - PRIORITIZE: "WHEN TO USE WHAT" over theory.
-- NO IMAGES. TEXT, TABLES, CODE ONLY.
+- NO IMAGES.
+- TEXT, TABLES, CODE ONLY.
 - Be concise but information-dense.
 
-Previously covered concepts/context (DO NOT repeat):
+Previously covered concepts (DO NOT repeat):
 {prev_concepts_str}
 
 ========================
-WHAT TO BUILD
+WHAT TO BUILD (for the provided text chunk)
 ========================
-Build a **STRUCTURED MARKDOWN DOCUMENT** with the following sections (only if applicable to the content):
+
+Build a **STRUCTURED MARKDOWN DOCUMENT** with the following sections (fill ONLY if the text chunk contains relevant info):
 
 --------------------------------
 SECTION 1: CORE MENTAL MODEL
 --------------------------------
-Explain (with Code Demos):
-- Core definitions (Technical term in EN + VI explanation)
-- Key mental models (how it works in reality)
-- Why this approach is better than others
+Explain (if present in text):
+- What concepts are (vs others)
+- Key mental models
 
 --------------------------------
 SECTION 2: DECISION TABLES (VERY IMPORTANT)
 --------------------------------
-Provide tables that answer "When to use X vs Y".
-Each table MUST include:
-- Use case (Tình huống sử dụng)
-- Should use (Nên dùng gì)
-- Why (Tại sao - EN term + VI explanation)
-- Common mistake (Sai lầm thường gặp)
+Provide tables answering "When to use X vs Y" (if present in text).
+Each table MUST include: Use case, Should use, Why, Common mistake.
 
 --------------------------------
-SECTION 3: ARCHITECTURE & RELATIONSHIPS
+SECTION 3: BUILDERS & SCOPE – HOW THEY RELATE
 --------------------------------
-Explain hierarchies and how components relate.
-Include a TEXT-BASED diagram or flowchart.
+Relationships, hierarchies, structure (if present).
 
 --------------------------------
-SECTION 4: CODE PATTERNS (READY TO USE)
+SECTION 4: CODE PATTERNS (EXAM-READY)
 --------------------------------
-For EACH pattern:
-- When to use (Khi nào dùng - Vietnamese)
-- Why this pattern is correct (Tại sao đúng)
-- Full Code Example (Code demo hoàn chỉnh, dễ hiểu)
+For EACH pattern found:
+- When to use (Vietnamese)
+- Why this pattern is correct
+- Minimal but COMPLETE code example
 
 --------------------------------
 SECTION 5: ANTI-PATTERNS & WARNINGS
 --------------------------------
-List dangerous practices found in the text. Explain WHY they are dangerous in Vietnamese.
+List dangerous practices found in the text.
 
 --------------------------------
-SECTION 6: MASTER CHEAT SHEET
+SECTION 6: ONE-PAGE CHEAT SHEET ITEMS
 --------------------------------
-End with:
-- Quick reference rules
-- Decision logic (If-Else style)
-- "Top 10 things to remember"
+Add rules found here to the cheat sheet.
 
 ========================
-INPUT
+INPUT TEXT (Chunk starting page {start_page})
 ========================
-Use the following material as source knowledge (Chunk starting page {start_page}):
 {chunk_text}
 
 ========================
@@ -138,6 +133,7 @@ OUTPUT FORMAT
 - Use headings, tables, and code blocks
 - NO JSON
 - NO explanations outside the document
+- If a section has no information in this chunk, OMIT IT.
 """
 
 def call_openrouter(prompt):
@@ -197,7 +193,7 @@ def analyze_pdf_stream(pdf_path):
         chunk_text = "\n\n".join(chunk)
         prev_concepts_str = ", ".join(previous_concepts_accumulator[-5:]) if previous_concepts_accumulator else "None"
         
-        prompt = build_prompt(chunk_text, start_page, prev_concepts_str, filename)
+        prompt = build_prompt(chunk_text, start_page, prev_concepts_str)
         content = call_openrouter(prompt)
 
         if content:
@@ -227,6 +223,10 @@ def process_single_file_cli(pdf_path):
     filename = os.path.basename(pdf_path)
     output_filename = filename.replace(".pdf", "_GUIDE.md")
     output_path = os.path.join(directory, output_filename)
+
+    if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+        print(f"Skip (Done): {filename}")
+        return
 
     print(f"\n>> Start: {filename} -> {output_filename}")
     
@@ -274,3 +274,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+'''
+
+with open(r"e:\n8n-ngrok\openrouter_pdf_analyzer.py", "w", encoding="utf-8") as f:
+    f.write(new_code)
+print("Updated openrouter_pdf_analyzer.py v2")
