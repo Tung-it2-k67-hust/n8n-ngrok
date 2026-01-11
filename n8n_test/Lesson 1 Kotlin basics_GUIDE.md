@@ -7,19 +7,6 @@
 <!-- CHUNK 1-10 -->
 
 # DEVELOPER DECISION GUIDE: Kotlin Basics
-
-## SECTION 1: CORE MENTAL MODEL
-
-### Core Definitions
-
-*   **Variable (Bien)**: Vùng lưu trữ dữ liệu có tên. Kotlin có 2 loại:
-    *   `val` (Value): Không thể gán lại sau khi khai báo (bắt buộc immutable). **Luôn ưu tiên dùng `val`**.
-    *   `var` (Variable): Có thể thay đổi giá trị.
-*   **Type Inference (Suy diễn kiểu dữ liệu)**: Kotlin tự động xác định kiểu dữ liệu nếu bạn gán giá trị khởi tạo. Bạn không cần khai báo `Int` hay `String` nếu giá trị rõ ràng.
-*   **Null Safety (An toàn với Null)**: Kotlin buộc các biến **không thể null** mặc định. Để cho phép null, bạn phải khai báo rõ ràng bằng `?`.
-
-### Code Demos
-
 **Khai báo biến và suy diễn kiểu:**
 ```kotlin
 val name = "Alice" // String được suy diễn tự động, không thay đổi được
@@ -50,13 +37,6 @@ val orResult = (a < 5) || (b > 5)  // true (Một trong hai đúng)
 
 ## SECTION 2: DECISION TABLES
 
-### Biến: `val` vs `var`
-
-| Tình huống sử dụng | Nên dùng gì | Tại sao (Immutability / Mutability) | Sai lầm thường gặp |
-| :--- | :--- | :--- | :--- |
-| Giá trị khởi tạo và không thay đổi (ID người dùng, hằng số, kết quả tính toán) | **`val`** | **Immutability (Bất biến)**: Đảm bảo dữ liệu không bị thay đổi bất ngờ, code an toàn và dễ debug hơn. | Dùng `var` khi không cần thiết làm code bẩn, khó theo dõi luồng dữ liệu. |
-| Giá trị thay đổi liên tục (Biến đếm vòng lặp, trạng thái UI) | **`var`** | **Mutability (Biến đổi)**: Cần thiết khi trạng thái thực sự cần thay đổi. | Lạm dụng `var` dẫn đến các lỗi side-effect khó lường. |
-
 ### Nhóm dữ liệu: Array vs List
 
 | Tình huống sử dụng | Nên dùng gì | Tại sao (Performance / Mutability) | Sai lầm thường gặp |
@@ -64,62 +44,9 @@ val orResult = (a < 5) || (b > 5)  // true (Một trong hai đúng)
 | Cần danh sách cố định, truy cập nhanh theo chỉ số (index), chỉnh sửa phần tử tại chỗ. | **Array (`IntArray`, `Array<String>`)** | **Fixed-size & Mutable**: Cấu trúc bộ nhớ cố định, tối ưu cho truy cập ngẫu nhiên (O(1)). | Quên khởi tạo với số lượng phần tử cố định (ví dụ `IntArray(5)`). |
 | Danh sách thông thường, kích thước thay đổi (thêm/xóa), không cần quan tâm chỉ số. | **List (`listOf`)** | **Read-only mặc định**: `listOf` trả về immutable list. Dùng `mutableListOf` nếu cần sửa đổi. An toàn hơn Array. | Cố gắng sửa đổi List trả về từ `listOf()` (sẽ báo lỗi biên dịch). |
 
-## SECTION 3: ARCHITECTURE & RELATIONSHIPS
-
-### Cấu trúc Dữ liệu và Quan hệ
-
-```text
-[TỔNG QUAN KIỂU DỮ LIỆU]
-┌─────────────────────────────────────┐
-│    Basic Types (Primitive)          │
-│  (Int, Double, Boolean, String)     │
-└──────────────┬──────────────────────┘
-               │
-               │ Kế thừa / Tự động chuyển đổi
-               ▼
-┌─────────────────────────────────────┐
-│    Collections (Tập hợp)            │
-│                                     │
-│  Array (Sửa đổi tại chỗ)            │
-│       ▲                             │
-│       │                             │
-│  List (Chỉ đọc / Thêm/Xóa)         │
-│       ▲                             │
-│       │                             │
-│  Set (Phần tử duy nhất)             │
-└─────────────────────────────────────┘
-               │
-               │
-               ▼
-┌─────────────────────────────────────┐
-│    Null Safety (Xử lý Rỗng)        │
-│                                     │
-│  Non-Null (Loại trừ null)           │
-│       │                             │
-│  Nullable (Loại `Type?`)            │
-└─────────────────────────────────────┘
-```
-
-### Luồng Logic Conditionals
-
-```text
-[NHỊP ĐIỆU LOGIC]
-Bắt đầu -> [Điều kiện If] -> True? -> Thực thi khối 1
-                     |
-                     +-> False? -> [Có Else?] -> Thực thi khối 2
-                                        |
-                                        +-> Không -> Bỏ qua
-```
-
 ## SECTION 4: CODE PATTERNS
 
 ### Pattern : Xử lý Logic Nhánh rẽ (If/Else & When)
-
-**Khi nào dùng:**
-Khi cần hành động khác nhau dựa trên giá trị của một biến. Dùng `When` thay thế chuỗi `if-else-if` dài dòng.
-
-**Tại sao đúng:**
-`When` trong Kotlin có thể dùng như `switch` nhưng mạnh hơn: kiểm tra giá trị trực tiếp, khớp với expression, và bắt buộc xử lý tất cả các nhánh (nếu là expression) đảm bảo không bỏ sót trường hợp.
 
 **Code Demo:**
 
@@ -194,14 +121,23 @@ fun printLength(str: String?) {
 
 ## SECTION 5: ANTI-PATTERNS & WARNINGS
 
-1.  **Sử dụng `var` quá mức (Overusing `var`):**
-    *   **Tại sao nguy hiểm:** Làm luồng dữ liệu khó theo dõi. Khi giá trị biến đổi lung tung, việc debug trở thành cơn ác mộng và dễ gây race condition (trong đa luồng). Luôn ưu tiên `val`.
-
-2.  **Bỏ qua `else` trong `When` (nếu dùng làm expression):**
-    *   **Tại sao nguy hiểm:** Kotlin yêu cầu `When` phải bao quát tất cả các trường hợp khi dùng để gán giá trị. Nếu không có `else` và bạn bỏ sót một case, code sẽ không biên dịch được. (Ngoại trừ khi `When` kiểm tra sealed class hoặc enum đã covering hết).
 
 3.  **Quên xử lý Null với `!!` (Bang operator):**
     *   **Tại sao nguy hiểm:** `value!!` ép buộc Kotlin tin rằng biến không null. Nếu giá trị thực sự là `null`, app sẽ **Crash** ngay lập tức. Chỉ dùng khi bạn chắc chắn 100% giá trị không bao giờ null.
+
+fun printLength(text: String?) {
+    val length = text!!.length
+    println(length)
+}
+
+fun main() {
+    printLength(null)
+} //Exception in thread "main" kotlin.KotlinNullPointerException
+text có kiểu String? → có thể là null
+
+text!! nói với Kotlin rằng: “Tin tôi đi, nó không null”
+
+Nhưng thực tế truyền vào null → Crash ngay lập tức
 
 ## SECTION 6: MASTER CHEAT SHEET
 
@@ -230,13 +166,6 @@ fun printLength(str: String?) {
 
 # DEVELOPER DECISION GUIDE: KOTHIR BASICS - NUMERIC TYPES & OPERATIONS
 
-## SECTION 1: CORE MENTAL MODEL
-
-### Core Definitions
-- **Primitives (Primitive Types - Các kiểu dữ liệu cơ bản)**: Basic numeric types stored directly in memory (Int, Double, Byte, etc.). Kotlin uses these for performance but allows object-like method calls.
-- **Type Inference (Suy diễn kiểu - Kiểu tự suy luận)**: Kotlin automatically determines the type of a number based on its literal format.
-- **Type Casting (Chuyển đổi kiểu - Ép kiểu)**: Explicit conversion between different numeric types.
-
 ### Key Mental Models
 **"Type Follows Form"**: The result of an operation always matches the operand types, not the "smartest" type.
 
@@ -251,64 +180,7 @@ val times: Int = 2.times(3)     // Result: 6 (Int)
 val plus: Double = 3.5.plus(4)  // Result: 7.5 (Double)
 ```
 
-### Why This Approach?
-**Performance + Flexibility**: Kotlin defaults to efficient primitives (no object overhead) but provides method syntax when needed. This is better than Java's `Integer.valueOf(5).intValue()` verbosity.
 
----
-
-## SECTION 2: DECISION TABLES
-
-### Table 1: Integer vs Floating-Point Division
-| Tình huống sử dụng | Nên dùng gì | Tại sao | Sai lầm thường gặp |
-|---|---|---|---|
-| Calculate exact whole number division (e.g., splitting items into batches) | **Int / Int** | **Integer Division (Phép chia số nguyên)**: Truncates decimal part, yields Int result | Expecting 0.5 from `1 / 2`. This yields 0. |
-| Calculate precise ratios (e.g., prices, percentages) | **Double / Double** | **Floating-Point Division (Phép chia số thực)**: Preserves decimal precision, yields Double result | Using `Int / Int` for financial calculations, losing cents. |
-
-### Table 2: Type Conversion Strategy
-| Tình huống sử dụng | Nên dùng gì | Tại sao | Sai lầm thường gặp |
-|---|---|---|---|
-| Store large ranges (e.g., timestamps, user IDs) | **Long** | **64-bit Range (Phạm vi 64-bit)**: Prevents overflow for large numbers | Using `Int` for IDs > 2.1 billion causes crash. |
-| Store small values (e.g., flags, status codes, pixel values) | **Byte/Short** | **Memory Efficiency (Tiết kiệm bộ nhớ)**: Uses 1-2 bytes vs 4 bytes | Using `Int` for a status code (0-10) wastes memory. |
-| Need precision with decimals (e.g., scientific calculations) | **Double** | **16-17 Significant Digits (16-17 chữ số đáng kể)**: Higher precision than Float | Using `Float` for calculations requiring high precision. |
-| Need to convert Int to Byte/Short | **Use `.toByte()` / `.toShort()`** | **Explicit Casting (Chuyển đổi rõ ràng)**: Prevents accidental data loss | Direct assignment: `val b: Byte = i` (Compile Error: Type Mismatch) |
-
----
-
-## SECTION 3: ARCHITECTURE & RELATIONSHIPS
-
-### Numeric Type Hierarchy (Bit Width)
-```text
-[Kotlin Number Hierarchy by Range]
-       Long (64-bit)  -> Range: -9 quintillion to +9 quintillion
-       |
-       Int (32-bit)   -> Range: -2.1 billion to +2.1 billion
-       |
-       Short (16-bit) -> Range: -32,768 to +32,767
-       |
-       Byte (8-bit)   -> Range: -128 to +127
-
-[Float vs Double]
-       Double (64-bit) -> Precision: 16-17 digits (Default for decimals)
-       Float (32-bit)  -> Precision: 6-7 digits (Rarely used)
-```
-
-### Operation Result Flow
-```text
-Input: Operand A (Type X) + Operand B (Type Y)
-       |
-       v
-[Operator Precedence & Type Check]
-       |
-       v
-Result: Type X (if both are Int/Long/Short/Byte)
-    OR
-Result: Type Double (if either is Double)
-       |
-       v
-[Output: Strictly follows operand types]
-```
-
----
 
 ## SECTION 4: CODE PATTERNS (READY TO USE)
 
@@ -372,49 +244,6 @@ val byteTemp: Byte = temperatureCelsius.toByte()
 
 ---
 
-## SECTION 5: ANTI-PATTERNS & WARNINGS
-
-### ❌ Anti-Pattern: Implicit Integer Division
-**Code**: `val percentage = (current / total) * 100`
-**Why Dangerous**: If `current` and `total` are Integers, `current / total` is calculated first. If `current < total`, the result is `0`. The final result is `0`, not the expected percentage.
-**Fix**: Cast to Double before division: `(current.toDouble() / total) * 100`.
-
-### ❌ Anti-Pattern: Relying on Float for Precision
-**Code**: `val price: Float = 19.99f`
-**Why Dangerous**: Floats have only 6-7 significant digits. Accumulating Float values (e.g., in a loop) causes precision drift.
-**Fix**: Use `Double` unless memory is extremely constrained.
-
-### ❌ Anti-Pattern: Ignoring Type Mismatch Errors
-**Code**: `val b: Byte = 150` (150 fits in Int, but exceeds Byte range -128 to 127)
-**Why Dangerous**: While 150 fits in Int, assigning it to a Byte causes a compile-time error because the value might be out of range for Byte. Kotlin enforces safety.
-**Fix**: Use explicit casting `.toByte()` or ensure the literal fits the target type range.
-
----
-
-## SECTION 6: MASTER CHEAT SHEET
-
-### Quick Reference Rules
-1. **Int Literals**: Use `1`, `500`, `1_000_000`.
-2. **Long Literals**: Append `L` (e.g., `1_000_000L`).
-3. **Double Literals**: Use `.` (e.g., `1.0`, `3.14`).
-4. **Float Literals**: Append `f` (e.g., `1.0f`).
-5. **Binary Literals**: Use `0b` prefix (e.g., `0b101`).
-
-### Decision Logic (If-Else Style)
-```text
-IF (you need decimal points) THEN use Double
-ELSE IF (you need to store > 2.1 billion) THEN use Long
-ELSE IF (you need to store < 32,767) THEN use Short
-ELSE IF (you need to store < 127) THEN use Byte
-ELSE use Int (Default).
-
-IF (dividing integers for a decimal result) THEN cast one operand to Double
-ELSE IF (dividing integers for a whole number) THEN keep Int.
-
-IF (assigning Int to Byte/Short) THEN use .toByte() or .toShort()
-ELSE Direct Assignment.
-```
-
 ### Top 3 Things to Remember
 1. **1 / 2 = 0**: Integer division truncates. Use `1.0 / 2.0` (Double) or `1 / 2.0` (Double) for 0.5.
 2. **Type Follows Operand**: `Int + Int = Int`. `Int + Double = Double`.
@@ -443,19 +272,7 @@ val rawStr = """
     FROM Users 
     WHERE id = 1
 """
-```
 
-**Variable (Biến)**
-Kotlin là ngôn ngữ **statically-typed** (kiểm tra kiểu tĩnh). Kiểu dữ liệu được xác định tại thời điểm biên dịch (compile time).
-- **Type Inference (Suy diễn kiểu)**: Compiler tự động xác định kiểu nếu bạn không chỉ định.
-
-```kotlin
-// Compiler tự suy ra kiểu String
-var name = "Alice" 
-
-// Chỉ định kiểu яв ràng
-var age: Int = 25 
-```
 
 **val vs var**
 - **`val` (Value)**: Khởi tạo **một lần**, không thể gán lại (immutable). Tương đương `final` trong Java. **LUÔN ưu tiên dùng `val`**.
@@ -495,13 +312,6 @@ val msg2 = "Tổng tiền phải trả: ${balance + fee}"
 
 ## SECTION 2: DECISION TABLES
 
-### Table 2.1: `val` vs `var` (Quyết định khai báo biến)
-
-| Tình huống sử dụng | Nên dùng gì | Tại sao? (Why) | Sai lầm thường gặp |
-| :--- | :--- | :--- | :--- |
-| Giá trị hằng số, ID người dùng, cấu hình app | **`val`** | **Immutability (Bất biến)**: Đảm bảo dữ liệu không bị thay đổi ngoài ý muốn, tăng độ an toàn thread. | Lạm dụng `var` cho mọi thứ导致 code phức tạp, khó dự đoán giá trị tại điểm dùng. |
-| Biến đếm, biến cờ trạng thái UI | **`var`** | **Mutability (Thay đổi được)**: Cần thiết cho các thuật toán có vòng lặp hoặc thay đổi trạng thái lặp lại. | Dùng `val` cho các biến cần update UI会导致 crash (lỗi không gán lại được). |
-
 ### Table 2.2: Chuỗi thường vs Chuỗi thô
 
 | Tình huống sử dụng | Nên dùng gì | Tại sao? (Why) | Sai lầm thường gặp |
@@ -518,45 +328,9 @@ val msg2 = "Tổng tiền phải trả: ${balance + fee}"
 
 ---
 
-## SECTION 3: ARCHITECTURE & RELATIONSHIPS
-
-### 3.1. Hierarchy of Data Types & Variables
-
-```text
-Any Value (Giá trị)
-    ├── Determined by Compiler (Xác định bởi Biên dịch)
-    │   ├── Implicit Type (Ngầm định): `var x = 10` -> Int
-    │   └── Explicit Type (Rõ ràng): `var y: Double = 5.0`
-    │
-    └── Variable Storage (Cách lưu trữ)
-        ├── Immutable (Bất biến): `val` (Recommended)
-        └── Mutable (Thay đổi): `var`
-```
-
-### 3.2. String Processing Flow
-
-```text
-Input (Input)
-    │
-    ├── Line 1: Define String
-    │   ├── "Normal"  -> Chứa escape chars
-    │   └── """Raw""" -> Giữ nguyên format
-    │
-    ├── Line 2: Manipulate (Xử lý)
-    │   ├── Concat: "A" + "B" (Cũ, hay lỗi)
-    │   └── Template: "$var ${calc()}" (Mới, chuẩn)
-    │
-    └── Output (Output)
-```
-
----
-
 ## SECTION 4: CODE PATTERNS (READY TO USE)
 
 ### Pattern 1: The "Safe Initialization" Pattern (Using `val`)
-
-**Khi nào dùng:**
-Khi một giá trị được xác định ngay khi đối tượng được tạo và không bao giờ thay đổi (VD: Thuộc tính đối tượng, tham số hàm).
 
 **Tại sao đúng:**
 Tuân thủ nguyên lý immutability. Tránh việc vô tình sửa đổi giá trị gốc gây lỗi logic.
@@ -600,10 +374,6 @@ fun generateOrderMessage(items: Int, total: Double): String {
 
 ## SECTION 5: ANTI-PATTERNS & WARNINGS
 
-### 1. Using `var` instead of `val` (Overuse of Mutability)
-- **Lý do nguy hiểm:** Tạo ra các lỗi "Hidden State" (Trạng thái ẩn). Khi code chạy, bạn khó đoán được một `var` đang chứa giá trị gì nếu nó được thay đổi ở nhiều nơi. Code trở nên khó test và không an toàn trong môi trường đa luồng.
-- **Khắc phục:** Luôn bắt đầu với `val`. Chỉ đổi sang `var` khi bạn *thực sự* cần thay đổi giá trị.
-
 ### 2. String Concatenation Hell (`+` quá nhiều)
 - **Lý do nguy hiểm:** Code `s1 + s2 + s3` tạo ra nhiều object String rác (garbage) gây tốn bộ nhớ, và rất khó đọc khi có nhiều biến.
 - **Khắc phục:** Dùng **String Template** (`$` và `${}`) hoặc nếu loop nối chuỗi thì dùng `StringBuilder`.
@@ -616,18 +386,6 @@ fun generateOrderMessage(items: Int, total: Double): String {
 
 ## SECTION 6: MASTER CHEAT SHEET
 
-### Quick Reference Rules
-1.  **Variable**: `val` là mặc định (không đổi). `var` là ngoại lệ (có đổi).
-2.  **String**: Dùng `"""` cho nội dung đa dòng (JSON/SQL). Dùng `""` cho text 1 dòng.
-3.  **Template**: Dùng `$variable` hoặc `${expression}` thay vì `+`.
-
-### Decision Logic (If-Else)
-
-*   **IF** giá trị không thay đổi sau khi khởi tạo **->** **THEN** dùng `val`.
-*   **IF** giá trị cần update (state, counter) **->** **THEN** dùng `var`.
-*   **IF** text có dấu `"` hoặc xuống dòng **->** **THEN** dùng `"""`.
-*   **IF** text đơn giản, ngắn **->** **THEN** dùng `""`.
-
 ### Top 3 Things To Remember
 1.  **Immutability First**: `val` > `var`.
 2.  **Readability**: Template (`$`) > Concat (`+`).
@@ -639,15 +397,11 @@ fun generateOrderMessage(items: Int, total: Double): String {
 
 ## SECTION 1: CORE MENTAL MODEL
 
-### Core Definitions
-- **Range (Phạm vi)**: Dải giá trị liền mạch bao gồm cả giá trị bắt đầu và kết thúc (ví dụ: `1..100` bao gồm cả 1 và 100). Dùng để kiểm tra `in` hoặc lặp với `for`.
-- **When Expression (Câu lệnh When)**: Cấu trúc điều khiển đa nhánh. **Luôn ưu tiên** `When` thay vì `if-else` khi có ≥ 2 điều kiện để提高 readability và performance (tối ưu JVM bytecode).
-- **Range Operator (`..`)**: Tạo đối tượng `IntRange`, `CharRange`... Không dùng khoảng trắng (dùng `1..100` không phải `1 .. 100`).
-
 ### Key Mental Model
 - **Logic là data**: Trong Kotlin, `if` và `when` là **expressions** (trả về giá trị), không chỉ là statements. Gán kết quả trực tiếp vào biến để thay thế toán tử 3 ngôi (?:).
 - **Smart Casting**: Kiểm tra type trong `when` sẽ tự động cast variable sang type đó trong scope.
 - **Độ ưu tiên**: `When` > `If-Else` (khi ≥2 điều kiện), `For` với Range/Collection > `While` (trừ trường hợp lặp vô tận).
+
 
 ### Why This Approach
 - **Kotlin Style Guide**: `When` được khuyến khích cho branch logic, giúp code "expression-oriented" và dễ bảo trì.
@@ -673,37 +427,6 @@ fun generateOrderMessage(items: Int, total: Double): String {
 | Lặp có步长 (step) hoặc range | `for (i in 1..100 step 2)` | **Built-in Range Support**: `downTo`, `step` là keywords, không cần tính toán | Tính `i += 2` trong `while` → dễ sai logic, không handle negative range |
 | Lặp vô tận hoặc điều kiện phức tạp | `while (condition) { }` hoặc `do { } while` | **Conditional Execution**: Duyệt khi điều kiện thay đổi runtime, không xác định trước số lần | Dùng `for` với vô hạn → compile error hoặc infinite loop không break |
 | Cần index + element | `for ((idx, elem) in collection.withIndex())` | **Destructuring**: Truy cập đồng thời index và element, không cần map thủ công | Lặp 2 lần: lần 1 get index, lần 2 get element → inefficiency |
-
----
-
-## SECTION 3: ARCHITECTURE & RELATIONSHIPS
-
-### Control Flow Hierarchy
-```
-Control Flow
-├── Conditional (Điều kiện)
-│   ├── If/Else (Simple)
-│   │   └── Expression: `val x = if (c) a else b`
-│   └── When (Multi-branch)
-│       ├── Variable check: `when (x) { A ->, B -> }`
-│       ├── Range check: `when { x in 1..10 -> }`
-│       └── Type check: `when (obj) { is String -> }` (Smart Cast)
-│
-└── Looping (Lặp)
-    ├── For (Iterator-based)
-    │   ├── Range: `1..5`, `'a'..'z'`
-    │   ├── Collection: `for (item in list)`
-    │   └── Indexed: `collection.withIndex()`
-    └── While (Conditional-based)
-        ├── Pre-check: `while (cond) { }`
-        └── Post-check: `do { } while (cond)`
-```
-
-### Relationship Flow
-1. **Expression > Statement**: Luôn convert `if` thành expression khi trả về giá trị.
-2. **When > If**: Dùng `when` cho branch ≥3, hoặc branch có logic phức tạp (range, type).
-3. **For > While**: Dùng `for` cho collection/range đã biết; `while` cho điều kiện thay đổi.
-4. **Range là nền tảng**: `in` operator hoạt động với mọi Comparable (Int, Char, custom).
 
 ---
 
@@ -737,10 +460,6 @@ val tasks = listOf("Code", "Test", "Deploy")
 for ((index, task) in tasks.withIndex()) {
     println("Công việc $index: $task")
 }
-// Output:
-// Công việc 0: Code
-// Công việc 1: Test
-// Công việc 2: Deploy
 ```
 
 ### Pattern 3: While Loop with Break Condition
@@ -777,30 +496,6 @@ fun processInput(input: Any) {
 
 ---
 
-## SECTION 5: ANTI-PATTERNS & WARNINGS
-
-### Anti-Pattern 1: Dùng if-else ladder thay vì when
-**Nguy hiểm**: Code dài dòng, khó thêm nhánh, dễ quên `else` → crash runtime.
-**Ví dụ**: `if (x == 1) { } else if (x == 2) { } else if (x == 3) { }` → không scale.
-
-### Anti-Pattern 2: For loop với index thủ công
-**Nguy hiểm**: Dễ tràn số nguyên (overflow), quên increment → infinite loop, không handle dynamic size.
-**Ví dụ**: `var i = 0; while (i < list.size) { ... }` → lỗi nếu list thay đổi trong loop.
-
-### Anti-Pattern 3: Bỏ qua else trong when
-**Nguy hiểm**: `when` không exhaustive → compile error (nếu sealed class) hoặc runtime lỗi nếu missing branch.
-**Ví dụ**: `when (color) { RED ->, GREEN -> }` → không có BLUE → lỗi khi color = BLUE.
-
-### Anti-Pattern 4: Range với khoảng trắng
-**Nguy hiểm**: `1 .. 100` (có space) → compile error, không chạy được.
-**Ví dụ**: `if (x in 1 .. 100)` → syntax error, phải là `1..100`.
-
-### Anti-Pattern 5: Do-while không dùng break
-**Nguy hiểm**: Nếu điều kiện luôn true → infinite loop, treo app/thread.
-**Ví dụ**: `do { } while (true)` không có break → freeze UI (Android).
-
----
-
 ## SECTION 6: MASTER CHEAT SHEET
 
 ### Quick Reference Rules
@@ -810,22 +505,6 @@ fun processInput(input: Any) {
 4. **Index**: Dùng `withIndex()` + destructuring, không đếm tay.
 5. **Break**: Trong `while` luôn có `break` logic để tránh infinite loop.
 
-### Decision Logic (If-Else Style)
-```
-IF (branch count >= 3) 
-   THEN → Use `when`
-ELSE IF (branch count == 2) 
-   THEN → Use `if/else`
-ELSE 
-   → Use single `if`
-
-IF (looping over collection/range) 
-   THEN → Use `for`
-ELSE IF (looping until condition) 
-   THEN → Use `while`
-ELSE 
-   → Use `do/while` (if post-check needed)
-```
 
 ### Top 10 Things to Remember
 1. `when` là expression → gán `val result = when { }`.
@@ -845,18 +524,9 @@ ELSE
 
 ## SECTION 1: CORE MENTAL MODEL
 
-### Core Definitions
-- **Immutable List (Danh sách không thể thay đổi)**: A collection whose elements cannot be added, removed, or modified after creation. `listOf()` creates this.
-- **Mutable List (Danh sách có thể thay đổi)**: A collection whose elements can be altered (add, remove, update). `mutableListOf()` creates this.
-- **Array (Mảng)**: A fixed-size container holding multiple items of the same type. Elements are mutable, but the size is not.
-
 ### Key Mental Models
 - **"Val vs Var on Collections"**: If you declare a collection with `val`, you cannot reassign the variable to a new collection. However, if the collection is **Mutable**, you can still change its *internal* contents.
 - **Arrays are Low-Level**: Arrays in Kotlin are closer to Java arrays. They are performance-critical for primitives and have a fixed size. Use Lists for general application logic.
-
-### Why This Approach is Better
-- **Safety**: Immutable lists prevent accidental changes in other parts of your code (thread safety concept).
-- **Flexibility**: Kotlin provides specific types (`List` vs `MutableList`) so you explicitly declare your intent, reducing bugs.
 
 ---
 
@@ -870,23 +540,6 @@ ELSE
 | **Unknown size or mixed types** | `arrayOf()` or `List` | **Flexibility**: Can hold different types (e.g., `String`, `Int`). | Using this for strictly typed, high-performance loops; leads to casting issues. |
 
 ---
-
-## SECTION 3: ARCHITECTURE & RELATIONSHIPS
-
-### Collection Hierarchy
-`Any` (Root)
-├── `Array<T>` (Fixed size, primitive friendly)
-│   └── `intArrayOf`, `arrayOf`
-│
-└── `Collection<T>` (Abstract interface)
-    ├── `List<T>` (Ordered, Read-only)
-    │   └── `listOf()`
-    │
-    └── `MutableCollection<T>` (Modifiable)
-        ├── `MutableList<T>`
-        │   └── `mutableListOf()`
-        │
-        └── `Set<T>` / `MutableSet<T>`
 
 ### Data Flow
 ```text
@@ -959,23 +612,6 @@ fun main() {
 }
 ```
 
----
-
-## SECTION 5: ANTI-PATTERNS & WARNINGS
-
-### 1. The "Mutable Surprise"
-**Danger**: Creating a `List` with `mutableListOf()` but exposing it as `List` in a public function.
-**Why**: The caller cannot modify the list, but the receiver can. Inconsistency leads to bugs.
-**Fix**: Be explicit. Return `MutableList` if modification is intended, otherwise return `List`.
-
-### 2. Index Out of Bounds
-**Danger**: Accessing `myList[5]` when the list only has 3 items.
-**Why**: Kotlin throws `IndexOutOfBoundsException`. This crashes the app.
-**Fix**: Always check `.size` or use `.getOrNull(index)`.
-
-### 3. Using Arrays when Lists suffice
-**Danger**: Using `arrayOf()` for everything because "it works like a list".
-**Why**: Arrays have fixed size. You cannot simply `.add()` to an array. You must create a new array to increase size, which is expensive and verbose.
 
 ---
 
@@ -1008,30 +644,6 @@ Do you need to add/remove items later?
 <!-- CHUNK 51-59 -->
 
 # DEVELOPER DECISION GUIDE: Kotlin Null Safety
-
-## SECTION 1: CORE MENTAL MODEL
-
-### Core Definitions
-- **Nullable Type (Kiểu có thể null)**: Dữ liệu có thể chứa giá trị `null`. Ký hiệu `?` sau tên kiểu (VD: `Int?`). Kotlin ngăn chặn việc gán `null` cho biến không khai báo nullable.
-- **Safe Call Operator (Toán tử gọi an toàn)**: `?.`. Chỉ gọi phương thức/Thuộc tính nếu biến không `null`, ngược lại trả về `null`.
-- **Elvis Operator (Toán tử Elvis)**: `?:`. Cung cấp giá trị mặc định nếu biểu thức bên trái là `null`.
-- **Non-null Assertion Operator (Toán tử khẳng định không null)**: `!!`. Ép buộc biến thành không-null. Nếu biến là `null`, ném ra `NullPointerException`.
-
-### Key Mental Models
-**1. Null là một lỗi thiết kế, không phải là dữ liệu:**
-Kotlin mặc định biến không-null. Null chỉ được cho phép khi thực sự cần thiết (VD: dữ liệu từ API chưa rõ, dữ liệu optional).
-
-**2. Lập trình bảo vệ (Defensive Programming) tại compiler:**
-Thay vì viết `if (x != null)` ở runtime, Kotlin compiler buộc bạn xử lý null tại thời điểm biên dịch thông qua các toán tử đặc biệt.
-
-**3. "Chain of Safety":**
-Sử dụng chuỗi kết hợp `?.` và `?:` để xử lý dữ liệu mà không cần `if-else` lồng nhau.
-
-### Why this approach is better than others (Java)
-- **Null Pointer Exception (NPE)**: Cắt giảm 90% crash so với Java.
-- **Code clarity**: Xử lý null trở thành một phần logic code, không phải kiểm tra vương vít.
-- **Immutability**: Khuyến khích dùng `val` kết hợp null safety để đảm bảo tính ổn định.
-
 ---
 
 ## SECTION 2: DECISION TABLES
@@ -1048,38 +660,6 @@ Sử dụng chuỗi kết hợp `?.` và `?:` để xử lý dữ liệu mà kh�
 | :--- | :--- | :--- | :--- |
 | Biến nhận dữ liệu từ API hoặc User Input | **`Type?`** | **Safety**: Dữ liệu đầu vào không bao giờ an toàn tuyệt đối. Khai báo nullable bắt buộc phải xử lý. | Khai báo `Type` (non-null) nhưng gán `null` được (Compiler error). |
 | Biến khởi tạo ngay và không bao giờ thay đổi thành null | **`val: Type`** | **Guarantee**: Compiler đảm bảo biến luôn có giá trị, bạn không cần kiểm tra null mỗi khi dùng. | Khai báo `var` (mutable) khi không cần thiết, làm code phức tạp. |
-
----
-
-## SECTION 3: ARCHITECTURE & RELATIONSHIPS
-
-### Null Safety Flow Logic
-Hệ thống phân cấp xử lý null trong Kotlin hoạt động như một mạch logic tự động:
-
-```text
-[Variable Declaration]
-      |
-      v
-Is it Nullable? (Type?)
-      |
-   +--NO--> [Direct Access: val len = s.length] (An toàn 100%)
-   |
-   YES
-   |
-   v
-[Access Logic]
-   |
-   +-- Option A: Safe Call (?.) -------> Kết quả: [Value] hoặc [Null]
-   |
-   +-- Option B: Elvis (?:) ------------> Kết quả: [Value] hoặc [Default Value]
-   |
-   +-- Option C: Assertion (!!) --------> Kết quả: [Value] hoặc [Crash (NPE)]
-```
-
-**Relationship Flow:**
-1. **Non-Null Variable** (`Int`) -> Truy cập trực tiếp.
-2. **Nullable Variable** (`Int?`) -> Bắt buộc xử lý qua `?.`, `?:`, hoặc `!!`.
-3. **Smart Cast**: Nếu bạn kiểm tra `if (x != null)`, trong khối `if`, `x` được tự động ép kiểu thành non-null.
 
 ---
 
@@ -1162,7 +742,7 @@ fun sendNotification(token: String?) {
 - **Luôn luôn** dùng `?:` hoặc kiểm tra null sau khi dùng `?.` nếu bạn cần giá trị cụ thể.
 
 ### 3. Kiểm tra null nhưng không "Smart Cast"
-**Tại sao nguy hiểm (Làm code啰嗦):**
+**Tại sao nguy hiểm:**
 - Sai:
   ```kotlin
   if (x != null) {
