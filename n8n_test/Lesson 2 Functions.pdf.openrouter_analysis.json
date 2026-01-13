@@ -1,0 +1,243 @@
+{
+  "file": "Lesson 2 Functions.pdf",
+  "total_pages": 46,
+  "analysis_merged": [
+    {
+      "title": "Programs in Kotlin: Setup and Execution",
+      "summary": "This section introduces the basics of writing and running a Kotlin program. It explains that the main() function is the entry point for execution. The text details the steps to set up a new Kotlin file (Hello.kt) in IntelliJ IDEA, including creating the file, writing the main function, and running the program. It also demonstrates how to pass command-line arguments to the main function and access them within the code.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "fun main(args: Array<String>) {\nprintln(\"Hello, world!\")\n}",
+          "explanation": "Defines the entry point of a Kotlin program and prints 'Hello, world!' to the console."
+        },
+        {
+          "language": "Kotlin",
+          "code": "fun main(args: Array<String>) {\nprintln(\"Hello, ${args[0]}\")\n}",
+          "explanation": "Demonstrates how to access and print the first command-line argument passed to the program."
+        }
+      ]
+    },
+    {
+      "title": "Expressions and Values in Kotlin",
+      "summary": "This section establishes a core concept of Kotlin: almost everything is an expression that returns a value. It demonstrates using 'if' as an expression that returns a Boolean result (true/false) and shows that even function calls like 'println' return a value, specifically the 'kotlin.Unit' type, which represents the absence of a value.",
+      "code_blocks": [
+        {
+          "language": "kotlin",
+          "code": "val temperature = 20\nval isHot = if (temperature > 40) true else false\nprintln(isHot)\n⇒ false",
+          "explanation": "Demonstrates that 'if' is an expression. The result of the 'if' statement (false in this case) is assigned to 'isHot'."
+        },
+        {
+          "language": "kotlin",
+          "code": "val isUnit = println(\"This is an expression\")\nprintln(isUnit)\n⇒ This is an expression\nkotlin.Unit",
+          "explanation": "Shows that even 'println' returns a value. The value is the singleton object 'kotlin.Unit', indicating the function executed successfully but returned no data."
+        }
+      ]
+    },
+    {
+      "title": "Function Basics and Declaration",
+      "summary": "This part introduces functions in Kotlin as modular blocks of code declared with the 'fun' keyword. It revisits the basic structure of a function definition and execution, linking back to the 'main' function concept from the previous section.",
+      "code_blocks": [
+        {
+          "language": "kotlin",
+          "code": "fun printHello() {\nprintln(\"Hello World\")\n}\nprintHello()",
+          "explanation": "A standard function definition that performs a task (printing) and is called by its name."
+        }
+      ]
+    },
+    {
+      "title": "Return Types and Unit",
+      "summary": "This section explains the return type of functions. It introduces 'Unit' as the return type for functions that do not return a meaningful value. It clarifies that while the explicit return type 'Unit' is valid, it is optional and usually omitted for cleaner code.",
+      "code_blocks": [
+        {
+          "language": "kotlin",
+          "code": "fun printHello(name: String?): Unit {\nprintln(\"Hi there!\")\n}",
+          "explanation": "Explicitly defines the function return type as Unit."
+        },
+        {
+          "language": "kotlin",
+          "code": "fun printHello(name: String?) {\nprintln(\"Hi there!\")\n}",
+          "explanation": "Shows the idiomatic way to write a function returning Unit (omitting the return type declaration)."
+        }
+      ]
+    },
+    {
+      "title": "Function Arguments and Modifiers",
+      "summary": "This section covers the flexibility of function parameters. It explains the three main ways to define arguments: required, default, and named. It focuses on 'Default Parameters', showing how to assign fallback values to arguments to make functions more versatile.",
+      "code_blocks": [
+        {
+          "language": "kotlin",
+          "code": "fun drive(speed: String = \"fast\") {\nprintln(\"driving $speed\")\n}\ndrive() ⇒ driving fast\ndrive(\"slow\") ⇒ driving slow\ndrive(speed = \"turtle-like\") ⇒ driving turtle-like",
+          "explanation": "Demonstrates defining a default value using '='. The code shows calling the function with no arguments (uses default), positional argument (overwrites default), and named argument (explicitly assigning value)."
+        }
+      ]
+    },
+    {
+      "title": "Các loại tham số trong hàm (Required & Default)",
+      "summary": "Phần này làm rõ sự khác biệt giữa tham số bắt buộc (required) và tham số mặc định (default). Nếu không có giá trị mặc định, tham số là bắt buộc. Phần này cũng đề cập đến việc kết hợp cả hai loại tham số trong một hàm.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "fun tempToday(day: String, temp: Int) {\n    println(\"Today is $day and it's $temp degrees.\")\n}",
+          "explanation": "Hàm này minh họa tham số bắt buộc: cả 'day' và 'temp' đều phải được cung cấp khi gọi hàm."
+        },
+        {
+          "language": "Kotlin",
+          "code": "fun reformat(str: String,\n            divideByCamelHumps: Boolean,\n            wordSeparator: Char,\n            normalizeCase: Boolean = true){\n}\n\nreformat(\"Today is a day like no other day\", false, '_')",
+          "explanation": "Minh họa hàm có tham số bắt buộc và tham số mặc định. Gọi hàm chỉ cần cung cấp giá trị cho các tham số bắt buộc nếu các tham số mặc định nằm ở vị trí cuối."
+        }
+      ]
+    },
+    {
+      "title": "Đối số có tên (Named Arguments)",
+      "summary": "Để tăng khả năng đọc mã nguồn, Kotlin cho phép sử dụng tên đối số khi gọi hàm. Cần tuân theo quy ước đặt tham số mặc định ở vị trí cuối để việc gọi hàm được gọn gàng hơn.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "reformat(str, divideByCamelHumps = false, wordSeparator = '_')",
+          "explanation": "Sử dụng named arguments để chỉ rõ giá trị gán cho tham số nào, giúp mã nguồn dễ hiểu hơn."
+        }
+      ]
+    },
+    {
+      "title": "Hàm một biểu thức (Single-expression functions)",
+      "summary": "Kotlin cho phép viết các hàm trả về một biểu thức duy nhất một cách ngắn gọn bằng dấu bằng, thay vì dùng dấu ngoặc nhọn và từ khóa return.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "fun double(x: Int): Int = x * 2",
+          "explanation": "Phiên bản compact của hàm double, gộp logic và return thành một dòng."
+        }
+      ]
+    },
+    {
+      "title": "Hàm cấp cao và Lambda (Basics)",
+      "summary": "Giới thiệu khái niệm hàm first-class (có thể gán biến, truyền làm tham số). Lambda là hàm ẩn danh (không tên) biểu diễn bằng biểu thức. Phần này tách biệt với các ví dụ code thực tế ở các trang sau.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "var dirtLevel = 20\nval waterFilter = {level: Int -> level / 2}\nprintln(waterFilter(dirtLevel))",
+          "explanation": "Minh họa cú pháp Lambda: khai báo biến 'waterFilter' chứa một biểu thức hàm nhận vào Int và trả về Int."
+        },
+        {
+          "language": "Kotlin",
+          "code": "val waterFilter: (Int) -> Int = {level -> level / 2}",
+          "explanation": "Minh họa cú pháp kiểu hàm (Function Type). Khai báo rõ kiểu dữ liệu của biến 'waterFilter' trước khi gán Lambda."
+        },
+        {
+          "language": "Kotlin",
+          "code": "fun encodeMsg(msg: String, encode: (String) -> String): String {\n    return encode(msg)\n}",
+          "explanation": "Minh họa hàm cấp cao: 'encodeMsg' nhận một hàm khác ('encode') làm tham số để thực hiện xử lý."
+        }
+      ]
+    },
+    {
+      "title": "Higher-Order Functions và Tham số Hàm",
+      "summary": "Phần này mở rộng khái niệm hàm first-class từ trang trước. Nó giới thiệu cách gọi hàm higher-order bằng cách truyền một hàm (hoặc lambda) làm tham số. Có hai cách chính: truyền lambda trực tiếp hoặc truyền reference của hàm đã định nghĩa sẵn bằng toán tử '::'.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val enc1: (String) -> String = { input -> input.toUpperCase() }\nprintln(encodeMsg(\"abc\", enc1))",
+          "explanation": "Minh họa việc gán một lambda vào biến và truyền biến đó vào hàm encodeMsg."
+        },
+        {
+          "language": "Kotlin",
+          "code": "fun enc2(input:String): String = input.reversed()\nencodeMessage(\"abc\", ::enc2)",
+          "explanation": "Sử dụng toán tử '::' để truyền reference của hàm named function (enc2) làm tham số, thay vì gọi hàm đó."
+        }
+      ]
+    },
+    {
+      "title": "Cuối Tham số Hàm (Last Parameter Call Syntax)",
+      "summary": "Kotlin ưu tiên đặt tham số hàm (lambda) ở vị trí cuối cùng. Điều này cho phép viết codecleaner: có thể bỏ dấu ngoặc đơn khi truyền lambda nếu lambda là tham số duy nhất hoặc cuối cùng.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "encodeMsg(\"acronym\") { input -> input.toUpperCase() }",
+          "explanation": "Viết tắt cú pháp (trailing lambda), loại bỏ dấu ngoặc đơn và dấu ngoặc kép xung quanh lambda."
+        }
+      ]
+    },
+    {
+      "title": "Các Hàm Built-in của Kotlin và 'it'",
+      "summary": "Giới thiệu các hàm có sẵn như `filter` và `repeat` hoạt động dựa trên cú pháp tham số cuối. Giải thích về 'it': nếu lambda có đúng 1 tham số, ta có thể bỏ qua khai báo tham số và dấu '->', và tham số đó mặc định được gọi là 'it'.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "repeat(3) {\n    println(\"Hello\")\n}",
+          "explanation": "Sử dụng hàm `repeat` với trailing lambda để lặp lại hành động."
+        },
+        {
+          "language": "Kotlin",
+          "code": "ints.filter { it > 0 }",
+          "explanation": "Sử dụng `it` để truy cập giá trị của phần tử trong list mà không cần khai báo rõ tên biến."
+        }
+      ]
+    },
+    {
+      "title": "Lọc Danh sách (List Filtering)",
+      "summary": "Cơ chế hoạt động của hàm `filter`. Lambda bên trong được thực thi cho từng phần tử. Nếu biểu thức trả về true, phần tử đó được giữ lại; nếu false, bị loại bỏ.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val books = listOf(\"nature\", \"biology\", \"birds\")\nprintln(books.filter { it[0] == 'b' })",
+          "explanation": "Lọc các cuốn sách bắt đầu bằng chữ 'b'. Kết quả in ra là [biology, birds]."
+        }
+      ]
+    },
+    {
+      "title": "Lazy vs Eager Evaluation",
+      "summary": "So sánh cách lọc danh sách tích cực (Eager) và trì hoãn (Lazy). Eager (mặc định của `filter`) tạo danh sách mới ngay lập tức. Lazy không tạo kết quả cho đến khi cần thiết, hữu ích cho danh sách lớn hoặc khi không cần dùng hết kết quả.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val eager = instruments.filter { it [0] == 'v' }",
+          "explanation": "Minh họa lọc tích cực (Eager filter): tạo list mới ngay khi dòng code được thực thi."
+        }
+      ]
+    },
+    {
+      "title": "Lazy Filters and Sequences",
+      "summary": "Phần này trình bày chi tiết về cách sử dụng Sequences để tạo bộ lọc懒 (lazy). Thay vì tạo danh sách mới ngay lập tức (eager), việc chuyển đổi List sang Sequence bằng .asSequence() cho phép thực hiện các thao tác như filter một cách trì hoãn. Kết quả trả về là một đối tượng Sequence thay vì List, thể hiện tính trạng thái 'chưa được tính toán'.",
+      "code_blocks": [
+        {
+          "language": "kotlin",
+          "code": "val instruments = listOf(\"viola\", \"cello\", \"violin\")\nval filtered = instruments.asSequence().filter { it[0] == 'v'}\nprintln(\"filtered: \" + filtered)\n// Output: filtered: kotlin.sequences.FilteringSequence@386cc1c4",
+          "explanation": "Minh họa việc tạo một Sequence từ List và áp dụng filter. Kết quả in ra là địa chỉ đối tượng Sequence, xác nhận rằng dữ liệu chưa được xử lý/lấy ra ở thời điểm này."
+        }
+      ]
+    },
+    {
+      "title": "Chuyển đổi Sequences trở lại Lists",
+      "summary": "Giải thích cách kết thúc quá trình lazy evaluation bằng cách chuyển đổi Sequence trở lại thành List. Sử dụng phương thức .toList() sẽ buộc Sequence thực thi các thao tác (như filter) và tạo ra một danh sách mới chứa kết quả.",
+      "code_blocks": [
+        {
+          "language": "kotlin",
+          "code": "val filtered = instruments.asSequence().filter { it[0] == 'v'}\nval newList = filtered.toList()\nprintln(\"new list: \" + newList)\n// Output: new list: [viola, violin]",
+          "explanation": "Biến đổi Sequence thành List. Thao tác này thực thi các phần tử lọc và trả về danh sách '[viola, violin]'."
+        }
+      ]
+    },
+    {
+      "title": "Các phép biến đổi List khác (Map và Flatten)",
+      "summary": "Giới thiệu các phương thức biến đổi danh sách phổ biến khác. map() dùng để ánh xạ (transform) mỗi phần tử, còn flatten() dùng để gộp các collection lồng nhau thành một danh sách phẳng.",
+      "code_blocks": [
+        {
+          "language": "kotlin",
+          "code": "val numbers = setOf(1, 2, 3)\nprintln(numbers.map { it * 3 })\n// Output: [3, 6, 9]",
+          "explanation": "Sử dụng map() để nhân đôi mỗi phần tử trong set."
+        },
+        {
+          "language": "kotlin",
+          "code": "val numberSets = listOf(setOf(1, 2, 3), setOf(4, 5), setOf(1, 2))\nprintln(numberSets.flatten())\n// Output: [1, 2, 3, 4, 5, 1, 2]",
+          "explanation": "Sử dụng flatten() để gộp các set bên trong thành một List duy nhất."
+        }
+      ]
+    },
+    {
+      "title": "Tổng kết Lesson 2",
+      "summary": "Phần tổng kết tổng hợp các kỹ năng đã học, bao gồm việc tạo file/main function, cấu trúc hàm (default arguments, compact functions), sử dụng lambdas/higher-order functions, và đặc biệt là sự khác biệt giữa lọc danh sách dạng eager và lazy.",
+      "code_blocks": []
+    }
+  ]
+}

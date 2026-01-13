@@ -1,0 +1,228 @@
+{
+  "file": "Lesson 6 App navigation.pdf",
+  "total_pages": 52,
+  "analysis_merged": [
+    {
+      "title": "Multiple Activities and Intents",
+      "summary": "This section introduces the concept of navigating between different screens (Activities) using Intents. It defines what an Intent is (a request for an action) and distinguishes between Explicit Intents (targeting a specific app component) and Implicit Intents (requesting a generic action to be handled by any capable app). It highlights common use cases like viewing details, creating items, or accessing external services.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "fun viewNoteDetail() {\n  val intent = Intent(this, NoteDetailActivity::class.java)\n  intent.putExtra(NOTE_ID, note.id)\n  startActivity(intent)\n}",
+          "explanation": "Creates an Explicit Intent to navigate internally to 'NoteDetailActivity', passing a note ID as extra data."
+        },
+        {
+          "language": "Kotlin",
+          "code": "fun openExternalApp() {\n  val intent = Intent(\"com.example.workapp.FILE_OPEN\")\n  if (intent.resolveActivity(packageManager) != null) {\n    startActivity(intent)\n  }\n}",
+          "explanation": "Creates an Explicit Intent to launch a specific external app identified by the action string 'com.example.workapp.FILE_OPEN', checking if an app can handle it first."
+        },
+        {
+          "language": "Kotlin",
+          "code": "fun sendEmail() {\n  val intent = Intent(Intent.ACTION_SEND)\n  intent.type = \"text/plain\"\n  intent.putExtra(Intent.EXTRA_EMAIL, emailAddresses)\n  intent.putExtra(Intent.EXTRA_TEXT, \"How are you?\")\n  if (intent.resolveActivity(packageManager) != null) {\n    startActivity(intent)\n  }\n}",
+          "explanation": "Creates an Implicit Intent requesting to send text data. It asks the system to find any app capable of handling the 'ACTION_SEND' action (like an email client)."
+        }
+      ]
+    },
+    {
+      "title": "UI Navigation Components",
+      "summary": "This section covers the visual elements used for app navigation. It mentions the App bar (top bar), Navigation Drawer (side menu), and Menus as standard components for organizing navigation within an Android application.",
+      "code_blocks": []
+    },
+    {
+      "title": "Android Navigation Components: App Bar, Drawer, and Menu",
+      "summary": "This section provides a concise overview of standard navigation UI components in Android. It covers the App Bar, Navigation Drawer, and Menus, focusing on the implementation of Menus. Key takeaways include defining menu items in XML resources (res/menu), understanding the structure of <menu>, <item>, and <group> tags, and how to interact with menus programmatically in an Activity. The section concludes with an introduction to Fragments, describing them as 'microactivities' that represent portions of UI and are hosted within an Activity.",
+      "code_blocks": [
+        {
+          "language": "XML",
+          "code": "<menu xmlns:android=\"http://schemas.android.com/apk/res/android\"\nxmlns:app=\"http://schemas.android.com/apk/res-auto\">\n<item\nandroid:id=\"@+id/action_settings\"\nandroid:orderInCategory=\"100\"\nandroid:title=\"@string/action_settings\"\napp:showAsAction=\"never\" />\n</menu>",
+          "explanation": "Defines a basic menu resource file with a single item. The 'app:showAsAction=\"never\"' attribute indicates this item will always be located in the overflow menu (the three vertical dots) rather than on the App Bar itself."
+        },
+        {
+          "language": "XML",
+          "code": "<menu>\n<group android:checkableBehavior=\"single\">\n<item android:id=\"@+id/nav_home\" android:icon=\"@drawable/ic_menu_camera\" android:title=\"@string/menu_home\" />\n<item android:id=\"@+id/nav_gallery\" android:icon=\"@drawable/ic_menu_gallery\" android:title=\"@string/menu_gallery\" />\n<item android:id=\"@+id/nav_slideshow\" android:icon=\"@drawable/ic_menu_slideshow\" android:title=\"@string/menu_slideshow\" />\n</group>\n</menu>",
+          "explanation": "Demonstrates a menu with a group of items. The 'checkableBehavior=\"single\"' attribute on the group makes these items function like radio buttons, where only one can be selected at a time."
+        },
+        {
+          "language": "XML",
+          "code": "<menu xmlns:android=\"http://schemas.android.com/apk/res/android\"\nxmlns:app=\"http://schemas.android.com/apk/res-auto\">\n<item android:id=\"@+id/action_intent\"\nandroid:title=\"@string/action_intent\" />\n<item\nandroid:id=\"@+id/action_settings\"\nandroid:orderInCategory=\"100\"\nandroid:title=\"@string/action_settings\"\napp:showAsAction=\"never\" />\n</menu>",
+          "explanation": "An example of an 'Options menu' definition. It contains an item (action_intent) that might be shown directly on the bar if space permits, and another (action_settings) forced into the overflow."
+        },
+        {
+          "language": "Kotlin",
+          "code": "override fun onCreateOptionsMenu(menu: Menu): Boolean {\nmenuInflater.inflate(R.menu.main, menu)\nreturn true\n}",
+          "explanation": "This Kotlin function overrides the Activity lifecycle method to populate the UI's menu. It inflates the menu layout defined in 'R.menu.main' into the provided menu object."
+        },
+        {
+          "language": "Kotlin",
+          "code": "override fun onOptionsItemSelected(item: MenuItem): Boolean {\nwhen (item.itemId) {\nR.id.action_intent -> {\nval intent = Intent(Intent.ACTION_WEB_SEARCH)\nintent.putExtra(SearchManager.QUERY, \"pizza\")\nif (intent.resolveActivity(packageManager) != null) {\nstartActivity(intent)\n}\n}\nelse -> Toast.makeText(this, item.title, Toast.LENGTH_LONG).show()\n...",
+          "explanation": "Handles user clicks on menu items. It checks the item's ID (e.g., R.id.action_intent) to perform specific actions, such as launching a web search intent for 'pizza', or shows a Toast message for other items."
+        }
+      ]
+    },
+    {
+      "title": "Fragments Fundamentals",
+      "summary": "This section introduces the concept of Fragments. It highlights that a Fragment is a reusable portion of a UI or behavior (often described as a 'microactivity'). Crucially, a Fragment cannot exist on its own; it must be hosted within an Activity. Its lifecycle is directly tied to the host Activity's lifecycle, and Fragments can be dynamically added or removed at runtime to create flexible UIs.",
+      "code_blocks": []
+    },
+    {
+      "title": "Lưu ý về phiên bản Fragment",
+      "summary": "Tài liệu nhấn mạnh việc sử dụng AndroidX Fragment (androidx.fragment.app.Fragment) thay vì phiên bản platform (android.app.Fragment) đã lỗi thời. Điều này là kiến thức cốt lõi để đảm bảo tính tương thích và truy cập vào các tính năng mới, kết nối trực tiếp với khái niệm Fragment cơ bản đã giới thiệu trước đó.",
+      "code_blocks": []
+    },
+    {
+      "title": "Giới thiệu Navigation Component",
+      "summary": "Giới thiệu tổng quan về Navigation Component, một bộ thư viện và công cụ mạnh mẽ để quản lý điều hướng trong ứng dụng. Nó giả định mô hình một Activity chứa nhiều Fragment (Single-Activity Architecture). Component này gồm 3 phần chính: Navigation Graph (bản đồ định tuyến), NavHost (khu vực hiển thị), và NavController (bộ điều khiển luân chuyển).",
+      "code_blocks": []
+    },
+    {
+      "title": "Cài đặt Dependencies",
+      "summary": "Hướng dẫn cách thêm các thư viện cần thiết cho Navigation Component vào file build.gradle thông qua lệnh implementation. Đây là bước bắt buộc trước khi có thể sử dụng Navigation.",
+      "code_blocks": [
+        {
+          "language": "Gradle",
+          "code": "implementation \"androidx.navigation:navigation-fragment-ktx:$nav_version\"\nimplementation \"androidx.navigation:navigation-ui-ktx:$nav_version\"",
+          "explanation": "Khai báo thư viện Navigation cho Fragment và UI, sử dụng biến phiên bản $nav_version và KTX (Kotlin Extensions) để viết code ngắn gọn hơn."
+        }
+      ]
+    },
+    {
+      "title": "Cấu hình Navigation Host (NavHost)",
+      "summary": "Chi tiết cách khai báo NavHostFragment trong file layout XML. NavHost đóng vai trò là vùng chứa động, nơi các Fragment đích sẽ được hiển thị khi điều hướng. Tham số `app:navGraph` liên kết NavHost với file đồ thị định tuyến.",
+      "code_blocks": [
+        {
+          "language": "XML",
+          "code": "<fragment\n    android:id=\"@+id/nav_host\"\n    android:name=\"androidx.navigation.fragment.NavHostFragment\"\n    android:layout_width=\"match_parent\"\n    android:layout_height=\"match_parent\"\n    app:defaultNavHost=\"true\"\n    app:navGraph=\"@navigation/nav_graph_name\"/>",
+          "explanation": "Định nghĩa NavHostFragment trong layout Activity. `app:navGraph` chỉ định file XML chứa các tuyến đường, còn `app:defaultNavHost=\"true\"` cho phép bắt sự kiện nút Back của hệ thống."
+        }
+      ]
+    },
+    {
+      "title": "Cấu trúc Navigation Graph",
+      "summary": "Giải thích về Navigation Graph (file XML trong thư mục `res/navigation`). Nó đóng vai trò là sơ đồ tư duy kỹ thuật, liệt kê các điểm đến (destinations - các Fragment hoặc Activity) và các hành động (actions) để di chuyển giữa chúng, cùng với các hiệu ứng chuyển cảnh.",
+      "code_blocks": []
+    },
+    {
+      "title": "Tạo Fragment cơ bản",
+      "summary": "Đoạn code mẫu hướng dẫn cách tạo một Fragment đơn giản bằng Kotlin. Yêu cầu kế thừa từ lớp Fragment và ghi đè phương thức `onCreateView` để inflating (nạp) layout XML cho giao diện của Fragment.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "class DetailFragment : Fragment() {\n    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {\n        return inflater.inflate(R.layout.detail_fragment, container, false)\n    }\n}",
+          "explanation": "Định nghĩa một Fragment `DetailFragment`. Phương thức `inflater.inflate` chuyển đổi file XML `detail_fragment` thành đối tượng View để hiển thị."
+        }
+      ]
+    },
+    {
+      "title": "Định nghĩa Fragment Destinations và Actions",
+      "summary": "Hướng dẫn cách khai báo các Fragment destinations và các actions (hành động di chuyển) bên trong file navigation graph. Actions có thể được tạo tự động với quy ước đặt tên `action_<sourceFragment>_to_<destinationFragment>`.",
+      "code_blocks": [
+        {
+          "language": "XML",
+          "code": "<fragment\n    android:id=\"@+id/welcomeFragment\"\n    android:name=\"com.example.android.navigation.WelcomeFragment\"\n    android:label=\"fragment_welcome\"\n    tools:layout=\"@layout/fragment_welcome\" >\n    <action\n        android:id=\"@+id/action_welcomeFragment_to_detailFragment\"\n        app:destination=\"@id/detailFragment\" />\n</fragment>",
+          "explanation": "Ví dụ về một node Fragment trong navigation graph. Bên trong nó chứa một thẻ <action> định nghĩa đường dẫn chuyển cảnh từ `welcomeFragment` sang `detailFragment`."
+        }
+      ]
+    },
+    {
+      "title": "Khái niệm NavController và Thực thi hành động",
+      "summary": "Phần này chuyển từ việc khai báo Navigation Graph (XML) sang cách sử dụng nó trong code Kotlin. NavController là thành phần trung tâm để quản lý luồng điều hướng. Điểm quan trọng là phân biệt giữa việc định nghĩa một action trong XML và việc gọi phương thức `.navigate()` để thực thi hành động đó.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "val navController = findNavController(R.id.myNavHostFragment)\nfun navigateToDetail() {\n    navController.navigate(R.id.action_welcomeFragment_to_detailFragment)\n}",
+          "explanation": "Code minh họa cách lấy đối tượng NavController từ NavHostFragment và sử dụng phương thức navigate() để chuyển sang destination tiếp theo thông qua ID của action."
+        }
+      ]
+    },
+    {
+      "title": "Giới thiệu Safe Args Plugin",
+      "summary": "Để đảm bảo an toàn kiểu dữ liệu khi truyền dữ liệu giữa các destinations, Android cung cấp plugin Safe Args. Plugin này giúp tránh lỗi type mismatch và cho phép đặt giá trị mặc định.",
+      "code_blocks": [
+        {
+          "language": "Gradle",
+          "code": "classpath \"androidx.navigation:navigation-safe-args-gradle-plugin:$nav_version\"\napply plugin: \"androidx.navigation.safeargs.kotlin\"",
+          "explanation": "Cấu hình cấp độ project và module để kích hoạt Safe Args, cho phép sinh ra các class helper trong Kotlin."
+        }
+      ]
+    },
+    {
+      "title": "Quy trình truyền dữ liệu với Safe Args",
+      "summary": "Quy trình 5 bước để truyền dữ liệu: 1. Khai báo argument trong XML. 2. Tạo action. 3. Sử dụng Generated Class (SourceFragmentDirections) để set arguments. 4. Gọi navigate. 5. Nhận dữ liệu ở Fragment đích.",
+      "code_blocks": []
+    },
+    {
+      "title": "Khai báo Arguments trong XML",
+      "summary": "Cách định nghĩa các tham số dữ liệu mà Fragment đích mong đợi bên trong file navigation graph bằng thẻ <argument>. Cần chỉ định tên, kiểu dữ liệu (app:argType) và giá trị mặc định.",
+      "code_blocks": [
+        {
+          "language": "XML",
+          "code": "<fragment android:id=\"@+id/multiplyFragment\" ...>\n    <argument\n        android:name=\"number1\"\n        app:argType=\"float\"\n        android:defaultValue=\"1.0\" />\n</fragment>",
+          "explanation": "Minh họa cách khai báo hai tham số kiểu float là 'number1' và 'number2' cho fragment nhân đôi."
+        }
+      ]
+    },
+    {
+      "title": "Loại dữ liệu được hỗ trợ (Argument Types)",
+      "summary": "Bảng tóm tắt các kiểu dữ liệu cơ bản (Int, Float, String, Boolean...) và phức tạp (Enum, Array, Serializable, Parcelable) mà Safe Args hỗ trợ. Lưu ý: Một số kiểu không hỗ trợ giá trị mặc định ngoài null.",
+      "code_blocks": []
+    },
+    {
+      "title": "Tạo Action trong Navigation Graph",
+      "summary": "Để liên kết nguồn và đích, cần định nghĩa một thẻ <action> bên trong fragment nguồn trong XML, trỏ đến ID của fragment đích.",
+      "code_blocks": [
+        {
+          "language": "XML",
+          "code": "<fragment android:id=\"@+id/fragment_input\" ...>\n    <action\n        android:id=\"@+id/action_to_multiplyFragment\"\n        app:destination=\"@id/multiplyFragment\" />\n</fragment>",
+          "explanation": "XML định nghĩa một hành động (action) từ Fragment Input đến Fragment Multiply."
+        }
+      ]
+    },
+    {
+      "title": "Navigating with Actions and Passing Arguments",
+      "summary": "Phần này giải thích cách thực hiện điều hướng giữa các Fragment bằng cách sử dụng Navigation Actions. Ở Fragment nguồn (InputFragment), một action được tạo ra từ-generated class (InputFragmentDirections) kèm theo các tham số (n1, n2). Action này sau đó được truyền vào NavController để thực hiện chuyển đổi. Ở Fragment đích (MultiplyFragment), dữ liệu được truy xuất thông qua arguments (args) sử dụng generated class (MultiplyFragmentArgs) và by navArgs() delegate.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "override fun onViewCreated(view: View, savedInstanceState: Bundle?) {\n    super.onViewCreated(view, savedInstanceState)\n    binding.button.setOnClickListener {\n        val n1 = binding.number1.text.toString().toFloatOrNull() ?: 0.0\n        val n2 = binding.number2.text.toString().toFloatOrNull() ?: 0.0\n        val action = InputFragmentDirections.actionToMultiplyFragment(n1, n2)\n        view.findNavController().navigate(action)\n    }\n}",
+          "explanation": "Code xử lý sự kiện click nút, lấy dữ liệu từ input, tạo action với Safe Args (InputFragmentDirections), và gọi navigate() để chuyển sang Fragment tiếp theo."
+        },
+        {
+          "language": "Kotlin",
+          "code": "class MultiplyFragment : Fragment() {\n    val args: MultiplyFragmentArgs by navArgs()\n    // ...\n    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {\n        super.onViewCreated(view, savedInstanceState)\n        val number1 = args.number1\n        val number2 = args.number2\n        val result = number1 * number2\n        binding.output.text = \"${number1} * ${number2} = ${result}\"\n    }\n}",
+          "explanation": "Code ở Fragment đích sử dụng 'by navArgs()' để tự động bind các tham số đã chuyển sang (number1, number2) từ Bundle, sau đó thực hiện logic tính toán và hiển thị."
+        }
+      ]
+    },
+    {
+      "title": "Navigation UI và UI Components",
+      "summary": "Phần này đề cập đến cách tích hợp Navigation Controller với các thành phần giao diện người dùng (UI) như Menu, Navigation Drawer, và AppBar. Cụ thể, nó sử dụng NavigationUI để xử lý selections và kết nối DrawerLayout với Navigation Graph.",
+      "code_blocks": [
+        {
+          "language": "Kotlin",
+          "code": "override fun onOptionsItemSelected(item: MenuItem): Boolean {\n    val navController = findNavController(R.id.nav_host_fragment)\n    return item.onNavDestinationSelected(navController) ||\n        super.onOptionsItemSelected(item)\n}",
+          "explanation": "Phương thức xử lý chọn item trong Menu, chuyển đổi sự kiện chọn thành hành động điều hướng đến Destination tương ứng."
+        },
+        {
+          "language": "XML",
+          "code": "<androidx.drawerlayout.widget.DrawerLayout\n    android:id=\"@+id/drawer_layout\" ...>\n    <fragment\n        android:name=\"androidx.navigation.fragment.NavHostFragment\"\n        android:id=\"@+id/nav_host_fragment\" ... />\n    <com.google.android.material.navigation.NavigationView\n        android:id=\"@+id/nav_view\"\n        app:menu=\"@menu/activity_main_drawer\" ... />\n</androidx.drawerlayout.widget.DrawerLayout>",
+          "explanation": "Cấu trúc Layout XML định nghĩa DrawerLayout chứa NavHostFragment và NavigationView (thanh điều hướng bên lề)."
+        },
+        {
+          "language": "Kotlin",
+          "code": "val appBarConfiguration = AppBarConfig(navController.graph, drawer)\n// ...\nval navView = findViewById<NavigationView>(R.id.nav_view)\nnavView.setupWithNavController(navController)",
+          "explanation": "Code Kotlin cấu hình AppBarConfiguration và liên kết NavigationView với NavController để điều hướng tự động."
+        }
+      ]
+    },
+    {
+      "title": "Back Stack và Tóm tắt Lesson 6",
+      "summary": "Phần cuối giải thích khái niệm Back Stack (ngăn xếp lưu lịch sử) đối với cả Activity và Fragment, minh họa cách các trạng thái (State 1, 2, 3) được push/pop. Sau đó là phần tóm tắt các kỹ năng đã học trong lesson bao gồm: Intent, Fragment, Navigation Graph (NavGraph/NavHost/NavController), Safe Args, NavigationUI, và cơ chế Back Stack.",
+      "code_blocks": []
+    },
+    {
+      "title": "Tổng hợp kiến thức và bài học thực hành (Lesson 6)",
+      "summary": "Phần này là phần tổng hợp và gọi hành động (call to action) cho nội dung đã học, dựa trên ngữ cảnh từ các trang trước. Nó liệt kê các nguyên tắc và thành phần chính của Navigation Component (Principles of navigation, Navigation component, Pass data between destinations, NavigationUI) và nhắc lại các khái niệm từ phần tóm tắt trước đó (Intent, Fragment, NavGraph, Safe Args, Back Stack). Trọng tâm là hướng người học sang bài học số 6 (Lesson 6: App navigation) và hoàn thành 'Pathway' (con đường thực hành). Về mặt ngữ cảnh, phần này đánh dấu sự kết thúc của lý thuyết và chuyển hướng sang các bài tập thực hành để củng cố kỹ năng.",
+      "code_blocks": []
+    }
+  ]
+}
