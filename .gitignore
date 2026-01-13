@@ -22,9 +22,6 @@ pdfs/
 uploads/
 *.pdf.analysis.json
 *.pdf.openrouter_analysis.json
-*.md
-ngrok.yml
-docker-compose.yaml
 
 # Ignore IDE and editor files
 .idea/
