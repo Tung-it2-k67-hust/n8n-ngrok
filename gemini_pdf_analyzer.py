@@ -1,171 +1,222 @@
-#!/usr/bin/env python3
-"""
-gemini_pdf_analyzer.py
-
-Usage:
-    - Edit FOLDER_PATH and API_KEY below.
-    - Install dependencies: pip install pdfplumber requests
-    - (Optional) Install poppler and pdftotext if you prefer command-line extraction.
-    - Run: python gemini_pdf_analyzer.py
-
-What it does:
-    1. Finds all .pdf files in FOLDER_PATH
-    2. Extracts text per PDF (page-by-page) using pdfplumber
-    3. Builds a careful prompt in Vietnamese asking Gemini to:
-        - Split the PDF into "lessons"
-        - For each lesson, identify code blocks, detect language, show syntax and explain why code is written that way
-        - Return a structured JSON with lessons, code_blocks with explanations, and a detailed analysis
-    4. Calls Gemini REST endpoint using your API key (x-goog-api-key header).
-    5. Saves a JSON report next to each PDF (same name + .analysis.json)
-
-NOTE: Modify MODEL and ENDPOINT if you prefer a different Gemini model/version.
-"""
 import os
-import json
-import glob
 import time
-import pdfplumber
-import requests
+import re
+import google.generativeai as genai
+from typing import List, Optional, Tuple
 
-# ---------- USER CONFIG ----------
-FOLDER_PATH = r"E:\n8n-ngrok\n8n_test"
-API_KEY = "AIzaSyAz-eJ2ctwlHN3Cysdc1zACPewlFpxYucQ"
-MODEL = "gemini-1.5-flash"  # Changed to stable model for better rate limits
-ENDPOINT = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent"
-# ----------------------------------
+import pytesseract
+from pdf2image import convert_from_path
+from PIL import Image
 
-HEADERS = {
-    "Content-Type": "application/json",
-    "x-goog-api-key": API_KEY
-}
+# ================= CONFIG =================
+# Get API Key from .env file
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-def extract_text_from_pdf(path):
-    """Return list of pages (each page is text). Uses pdfplumber."""
-    pages = []
+MODEL_NAME = "gemini-1.5-flash-latest"
+
+# --- USER-REQUESTED PATHS ---
+# Point to the directory containing the PDF
+PDF_DIR = r"E:\n8n-ngrok\data\y_hoc"
+# Create a dedicated output directory for the analysis
+OUTPUT_DIR = r"E:\n8n-ngrok\data\y_hoc_analysis_gemini"
+
+# Process 5 pages per API call
+CHUNK_PAGES_DEFAULT = 5
+
+# ================= OCR CONFIG =================
+DPI = 300
+OCR_LANG = "vie+eng"  # Vietnamese + English
+
+# IMPORTANT: If Tesseract is not in your system's PATH, uncomment and set the path here
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
+# =================
+# CONFIGURE a text-only model
+genai.configure(api_key=GEMINI_API_KEY)
+text_model = genai.GenerativeModel(MODEL_NAME)
+
+
+# ================= UTILS =================
+def clean_filename(title: str) -> str:
+    """Removes invalid characters from a string to make it a valid filename."""
+    return re.sub(r'[\\/*?:"<>|]', "", title).strip().replace(" ", "_")
+
+# ================= OCR ENGINE =================
+def extract_text_from_pdf_ocr(
+    pdf_path: str,
+    start_page: int,
+    end_page: int
+) -> List[str]:
+    """
+    Converts specified pages of a PDF to images and uses Tesseract to extract text.
+    """
+    print(f"  OCR'ing pages {start_page} -> {end_page}...")
     try:
-        with pdfplumber.open(path) as pdf:
-            for p in pdf.pages:
-                text = p.extract_text() or ""
-                pages.append(text)
+        images = convert_from_path(
+            pdf_path,
+            dpi=DPI,
+            first_page=start_page,
+            last_page=end_page,
+        )
+
+        pages_text = []
+        for idx, img in enumerate(images, start=start_page):
+            text = pytesseract.image_to_string(img, lang=OCR_LANG)
+            text = text.strip()
+            pages_text.append(text if text else f"[Trang {idx}: Không nhận dạng được chữ]")
+        
+        print(f"    -> Extracted text from {len(pages_text)} pages.")
+        return pages_text
     except Exception as e:
-        print(f"Error reading PDF {path}: {e}")
-    return pages
+        print(f"    !! ERROR during OCR on pages {start_page}-{end_page}: {e}")
+        return []
 
-def build_prompt(pdf_name, pages):
-    joined = "\n\n".join(f"--- PAGE {i+1} ---\n{p}" for i,p in enumerate(pages))
-    prompt = f"""
-Bạn là một trợ giảng thông minh, đầu ra CHỈ LÀ JSON hợp lệ UTF-8. Đọc nội dung PDF (tên file: {pdf_name}) được đưa bên dưới, tiếng Việt. Nhiệm vụ:
-1) Chia tài liệu thành các "lesson" (bài học). Mỗi lesson cần:
-   - title: tiêu đề (nếu có, hoặc suy đoán ngắn)
-   - pages: danh sách số trang (1-based)
-   - summary: tóm tắt chi tiết (không quá ngắn) giải thích mục tiêu lesson
-   - details: phân tích chi tiết các phần quan trọng (giải thích ý tưởng, thuật toán, điểm cần lưu ý)
-   - code_blocks: mảng các đối tượng {{"language","code","line_range","why","what_it_does","complexity_notes"}}
-2) Khi phát hiện đoạn code:
-   - Nhận diện ngôn ngữ (Java, Kotlin, XML layout, Python, C, v.v.) và ghi vào "language"
-   - Đưa nguyên văn code (preserve indentation) vào "code"
-   - Giải thích từng phần: tại sao code làm như vậy, alternatives (nếu có), lỗi/anti-patterns cần tránh
-   - Nếu code gọi API hay framework Android (Activity, Intent, RecyclerView...), giải thích luồng dữ liệu và lifecycle liên quan
-3) Nếu có pseudo-code hoặc bullets mô tả thuật toán, chuyển thành mô tả step-by-step và (nếu cần) ví dụ ngắn
-4) Output phải là 1 JSON object:
-{{
-  "file": "<pdf file name>",
-  "lessons": [
-    {{
-      "title": "...",
-      "pages": [1,2],
-      "summary": "...",
-      "details": "...",
-      "code_blocks": [
-        {{
-          "language": "...",
-          "code": "...",
-          "line_range": [10,18],
-          "why": "...",
-          "what_it_does": "...",
-          "complexity_notes": "..."
-        }}
-      ]
-    }}
-  ]
-}}
-Dưới đây là nội dung PDF:
-{joined}
-Hãy trả về CHỈ JSON đúng theo schema ở trên, không thêm markdown formatting.
+
+# ================= AI CALLER =================
+def call_gemini(prompt: str) -> Tuple[Optional[str], Optional[str]]:
+    """Sends the prompt to the Gemini API and returns the response."""
+    try:
+        response = text_model.generate_content(prompt)
+        return response.text, None
+    except Exception as e:
+        error_message = f"An unexpected error occurred in call_gemini: {e}"
+        print(f"  !! {error_message}")
+        return None, error_message
+
+# ================= PROMPT BUILDER =================
+def build_medical_prompt(chunk_text: str, pdf_name: str) -> str:
+    """Creates a specialized prompt for analyzing medical texts."""
+    return f"""
+Bạn là một trợ lý y khoa AI, chuyên tóm tắt và hệ thống hóa tài liệu y văn.
+
+Nhiệm vụ của bạn là phân tích nội dung đã được OCR từ các trang của tài liệu "{pdf_name}". Dựa vào nội dung đó, hãy trình bày lại các kiến thức y khoa bằng tiếng Việt theo định dạng Markdown chuyên nghiệp.
+
+**YÊU CẦU CỤ THỂ:**
+
+1.  **Xác định và Tóm tắt Bệnh học/Hội chứng:** Với mỗi bệnh lý hoặc hội chứng tìm thấy, hãy cấu trúc thông tin theo các mục sau:
+    *   **Định nghĩa/Tổng quan:** Mô tả ngắn gọn về bệnh.
+    *   **Nguyên nhân & Sinh lý bệnh:** Giải thích cơ chế gây bệnh.
+    *   **Triệu chứng lâm sàng:** Liệt kê các dấu hiệu và triệu chứng quan trọng (cơ năng và thực thể).
+    *   **Cận lâm sàng:** Nêu các xét nghiệm, chẩn đoán hình ảnh, hoặc phương pháp cận lâm sàng cần thiết để chẩn đoán.
+    *   **Tiêu chuẩn chẩn đoán:** Nếu tài liệu đề cập, hãy ghi rõ các tiêu chuẩn được sử dụng để chẩn đoán xác định.
+    *   **Hướng điều trị:** Tóm tắt các nguyên tắc và phác đồ điều trị chính.
+
+2.  **Định dạng Markdown:**
+    *   Sử dụng headings (`##`, `###`), bullet points (`*`, `-`), và bold (`**text**`) để làm nổi bật và cấu trúc thông tin.
+    *   Tạo bảng (nếu cần) để so sánh các triệu chứng hoặc phác đồ.
+
+3.  **Xử lý nhiễu OCR:**
+    *   Thông minh bỏ qua các từ, ký tự, hoặc dòng chữ vô nghĩa do lỗi OCR.
+    *   Tuyệt đối không bịa đặt thông tin không có trong văn bản được cung cấp. Nếu một mục (ví dụ: "Hướng điều trị") không có trong đoạn trích, hãy ghi là "Không được đề cập trong đoạn này."
+
+4.  **Ngôn ngữ:**
+    *   Sử dụng ngôn ngữ y khoa chính xác, chuyên nghiệp.
+    *   Giữ nguyên các thuật ngữ y khoa tiếng Anh hoặc Latinh quan trọng.
+
+**NỘI DUNG OCR ĐỂ PHÂN TÍCH:**
+---
+{chunk_text}
+---
 """
-    return prompt
 
-def call_gemini(prompt):
-    payload = {
-        "contents": [
-            {"parts": [{"text": prompt}]} 
-        ]
-    }
-    
-    max_retries = 5
-    for attempt in range(max_retries):
-        resp = requests.post(ENDPOINT, headers=HEADERS, json=payload, timeout=120)
-        if resp.status_code == 429:
-            print(f"Rate limit hit (429). Waiting 20 seconds before retry {attempt+1}/{max_retries}...")
-            time.sleep(20)
-            continue
-        if resp.status_code != 200:
-            raise RuntimeError(f"API error {resp.status_code}: {resp.text}")
-        break
 
-    if resp.status_code != 200:
-        raise RuntimeError(f"API error {resp.status_code} after retries: {resp.text}")
+# ================= MAIN PROCESSING LOGIC =================
+def process_pdf_directory(
+    pdf_dir: str,
+    output_dir: str,
+    start_page: int,
+    end_page: Optional[int] = None
+):
+    """
+    Processes all PDF files in a given directory within a specified page range.
+    """
+    os.makedirs(output_dir, exist_ok=True)
 
-    data = resp.json()
-    
-    text = None
-    if "candidates" in data and isinstance(data["candidates"], list):
-        first = data["candidates"][0]
-        if "content" in first and "parts" in first["content"]:
-             parts = first["content"]["parts"]
-             if parts and "text" in parts[0]:
-                 text = parts[0]["text"]
-    
-    if not text:
-        text = json.dumps(data, ensure_ascii=False)
-    return text
-
-def main():
-    if not os.path.exists(FOLDER_PATH):
-        print(f"Creating folder: {FOLDER_PATH}")
-        os.makedirs(FOLDER_PATH)
-        
-    pdf_paths = glob.glob(os.path.join(FOLDER_PATH, "*.pdf"))
-    if not pdf_paths:
-        print("Không tìm thấy file PDF trong folder:", FOLDER_PATH)
+    if end_page is None:
+        print("FATAL: `end_page` cannot be None for processing. Please specify an end page.")
         return
+
+    pdf_files = [f for f in os.listdir(pdf_dir) if f.lower().endswith(".pdf")]
+    if not pdf_files:
+        print(f"No PDF files found in '{pdf_dir}'.")
+        return
+
+    for pdf_file in pdf_files:
+        pdf_path = os.path.join(pdf_dir, pdf_file)
         
-    for path in pdf_paths:
-        name = os.path.basename(path)
-        print("Processing", name)
-        pages = extract_text_from_pdf(path)
-        if not pages:
-            print("Skipping (no text)")
+        clean_pdf_name = clean_filename(pdf_file.replace(".pdf", ""))
+        output_filename = f"{clean_pdf_name}_ANALYSIS_p{start_page}-p{end_page}.md"
+        output_md_path = os.path.join(output_dir, output_filename)
+
+        if os.path.exists(output_md_path):
+            print(f"Skipping '{pdf_file}' (pages {start_page}-{end_page}) as output already exists.")
             continue
-        prompt = build_prompt(name, pages)
-        try:
-            ai_text = call_gemini(prompt)
-            # Cleanup potential markdown code blocks
-            clean_text = ai_text.strip()
-            if clean_text.startswith("```json"): clean_text = clean_text[7:]
-            if clean_text.startswith("```"): clean_text = clean_text[3:]
-            if clean_text.endswith("```"): clean_text = clean_text[:-3]
-            
-            parsed = json.loads(clean_text)
-        except Exception as e:
-            print("Error:", e)
-            parsed = {"raw": ai_text} if 'ai_text' in locals() else {"error": str(e)}
 
-        out_path = os.path.join(os.path.dirname(path), name + ".analysis.json")
-        with open(out_path, "w", encoding="utf-8") as f:
-            json.dump(parsed, f, ensure_ascii=False, indent=2)
-        print("Saved to", out_path)
-        time.sleep(1)
+        print(f"\n>>> PROCESSING: '{pdf_file}' (Pages: {start_page} -> {end_page})")
 
+        with open(output_md_path, "w", encoding="utf-8") as f:
+            f.write(f"# Phân tích tài liệu: {pdf_file}\n")
+            f.write(f"## Phạm vi trang: {start_page} - {end_page}\n\n")
+
+            current_page = start_page
+            while end_page is None or current_page <= end_page:
+                chunk_end = min(current_page + CHUNK_PAGES_DEFAULT - 1, end_page)
+                
+                print(f"  - Chunk: Pages {current_page} -> {chunk_end}")
+
+                pages_text_list = extract_text_from_pdf_ocr(
+                    pdf_path,
+                    current_page,
+                    chunk_end
+                )
+
+                if not pages_text_list:
+                    f.write(f"> **Lưu ý:** Không thể trích xuất nội dung từ trang {current_page}-{chunk_end}.\n\n")
+                    current_page = chunk_end + 1
+                    continue
+
+                chunk_text_for_prompt = "\n\n".join(
+                    f"--- Nội dung trang {i + current_page} ---\n{text}"
+                    for i, text in enumerate(pages_text_list) if text.strip()
+                )
+
+                if not chunk_text_for_prompt.strip():
+                    f.write(f"> **Lưu ý:** Nội dung từ trang {current_page}-{chunk_end} rỗng hoặc không nhận dạng được.\n\n")
+                    current_page = chunk_end + 1
+                    continue
+
+                print("    -> Sending to Gemini for analysis...")
+                response, error = call_gemini(build_medical_prompt(chunk_text_for_prompt, pdf_file))
+
+                if response:
+                    f.write(response + "\n\n---\n\n")
+                    print("    -> Successfully received and wrote analysis to file.")
+                else:
+                    f.write(f"> **Lỗi:** Không nhận được phản hồi từ Gemini cho các trang {current_page}-{chunk_end}.\n")
+                    if error:
+                        f.write(f"> **Chi tiết lỗi:** `{error}`\n\n")
+                    else:
+                        f.write("\n")
+                    print("    -> Failed to get analysis from Gemini.")
+                
+                f.flush()
+
+                time.sleep(2)
+
+                current_page = chunk_end + 1
+
+        print(f"\nDONE -> Output saved to {output_md_path}")
+
+
+# ================= RUN =================
 if __name__ == "__main__":
-    main()
+    if not GEMINI_API_KEY:
+        raise ValueError("GEMINI_API_KEY environment variable not set.")
+    
+    print("Script started...")
+    process_pdf_directory(
+        pdf_dir=PDF_DIR,
+        output_dir=OUTPUT_DIR,
+        start_page=10,
+        end_page=40
+    )

@@ -1,0 +1,33 @@
+# Ignore virtual environment
+.venv/
+venv/
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore environment variables
+.env
+
+# Ignore data and generated files
+data/
+n8n_test/
+web_slide/
+iot/
+n8n_ngrok/
+Fundamentals-of-Data-Engineering/
+pdfs/
+uploads/
+*.pdf.analysis.json
+*.pdf.openrouter_analysis.json
+*.md
+ngrok.yml
+docker-compose.yaml
+
+# Ignore IDE and editor files
+.idea/
+.vscode/
+*.swp
+*~
