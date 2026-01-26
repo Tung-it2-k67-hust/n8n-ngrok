@@ -288,12 +288,6 @@ fun main() {
 
 ### Pattern 2: Lambda as Parameter (Higher-Order)
 
-**Khi nào dùng:** Khi muốn một hàm thực hiện khung logic cố định (template), nhưng cho phép tùy chỉnh chi tiết xử lý qua tham số.
-
-**Tại sao đúng:** Tách biệt giữa thuật toán và chi tiết nghiệp vụ (Decoupling).
-
-**Code Demo Hoàn Chỉnh:**
-
 ```kotlin
 // Definition
 fun processSensorData(
@@ -367,9 +361,6 @@ fun main() {
         ```
 ---
 # DEVELOPER DECISION GUIDE: Higher-Order Functions & Collections
-
-## SECTION 1: CORE MENTAL MODEL
-
 ### Core Definitions
 *   **Higher-Order Function (HOF - Hàm bậc cao):** A function that accepts another function as a parameter or returns a function. Used to abstract behavior.
 *   **Function Type (Loại hàm):** Defines the signature of a function variable (e.g., `(String) -> String`).
@@ -422,8 +413,6 @@ This diagram shows how a HOF accepts a function type argument. The **Implementat
 
 ---
 
-## SECTION 4: CODE PATTERNS (READY TO USE)
-
 ### Pattern 1: The Standard Filter
 **When to use:** You need to extract a subset of a list based on a condition.
 
@@ -475,40 +464,6 @@ fun executeCommand(cmd: String) {
 
 
 ---
-
-## SECTION 5: ANTI-PATTERNS & WARNINGS
-
-### 1. The "Eager Filter Chain" on Large Data
-**Danger:** Doing `hugeList.filter { }.map { }.filter { }` creates a new collection after *every* step.
-**Why:** It can cause `OutOfMemoryError` or significant lag (GC thrashing).
-**Fix:** Convert to `hugeList.asSequence().filter { }.map { }.toList()`.
-
-### 2. Ignoring `it` Shadowing
-**Danger:** Nesting lambdas without renaming `it`.
-**Why:** `it` refers to the *immediate* enclosing lambda. In nested scopes, `it` becomes ambiguous and unreadable.
-
-```kotlin
-// BAD
-listOf(1, 2).forEach { // 'it' is Int
-    listOf("a", "b").forEach { 
-        println(it) // ERROR: 'it' here is String? Or Int? Hard to tell.
-    }
-}
-
-// GOOD (Explicit Naming)
-listOf(1, 2).forEach { num ->
-    listOf("a", "b").forEach { str ->
-        println("$num : $str")
-    }
-}
-```
-
-### 3. Misusing `::` (Function References)
-**Danger:** Passing `::myFunction` when `myFunction` relies on external state not passed via arguments.
-**Why:** A function reference points to a specific function with a specific signature. If the HOF expects `(String) -> Unit`, you cannot pass `fun myFunc() { ... }` or a class method requiring `this`.
-
----
-
 ## SECTION 6: MASTER CHEAT SHEET
 
 ### Top 10 Rules
@@ -528,13 +483,7 @@ listOf(1, 2).forEach { num ->
 *   **IF** the logic is complex or reused -> **Named Function + `::` reference**.
 *   **IF** the list is huge (>10k items) -> **Use Sequence**.
 *   **IF** the parameter is a lambda and last -> **Trailing syntax**.
-
-<!-- CHUNK 41-46 -->
-
 # DEVELOPER DECISION GUIDE: Lesson 2 Functions
-
-## SECTION 1: CORE MENTAL MODEL
-
 **Sequence (Chuỗi lười biếng)**: Dòng dữ liệu chỉ xử lý phần tử khi cần thiết. Thay vì tạo collection mới ngay lập tức, nó tạo ra một "kế hoạch" thực thi.
 **Eager (Nhiệt tình)**: Xử lý ngay lập tức, tạo ra collection mới ở mỗi bước.
 
