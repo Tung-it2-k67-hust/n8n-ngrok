@@ -9,40 +9,6 @@
 # DEVELOPER DECISION GUIDE: Classes and Objects
 
 --------------------------------
-SECTION 1: CORE MENTAL MODEL
---------------------------------
-
-**Class (Lớp)**
-Định nghĩa cấu trúc dữ liệu và hành vi. Đây là bản thiết kế (blueprint) để tạo ra các đối tượng cụ thể.
-
-**Object Instance (Đối tượng)**
-Một thực thể cụ thể được khởi tạo từ Class. Mỗi instance sở hữu bản sao riêng của dữ liệu (state).
-
-**Mental Model:**
-Hãy tưởng tượng Class là "Khuôn bánh quy". Object là "chiếc bánh quy" thực tế bạn ăn được. Bạn không thể ăn cái khuôn, nhưng bạn có thể tạo ra hàng trăm chiếc bánh từ nó.
-
-**Tại sao approach này hiệu quả?**
-- **Mã tái sử dụng:** Viết một lần (Class), dùng nhiều lần (Instances).
-- **Bảo trì:** Sửa lỗi ở Class → Cập nhật tự động cho mọi Instance.
-- **Code Organization:** Gom nhóm dữ liệu (data) và hành vi (behavior) vào cùng một nơi.
-
-```kotlin
-// Class (Blueprint)
-class Car(val brand: String, var speed: Int = 0) {
-    fun accelerate(increment: Int) {
-        speed += increment
-    }
-}
-
-// Object Instances (Actual things)
-val myToyota = Car("Toyota")
-val yourHonda = Car("Honda", 100)
-
-myToyota.accelerate(20) // myToyota.speed = 20
-// yourHonda vẫn giữ speed = 100
-```
-
---------------------------------
 SECTION 2: DECISION TABLES
 --------------------------------
 
@@ -153,50 +119,7 @@ class Rectangle(val w: Int, val h: Int) {
     }
 }
 ```
-
 --------------------------------
-SECTION 5: ANTI-PATTERNS & WARNINGS
---------------------------------
-
-**1. Mutable Public Properties (var)**
-- **Tại sao nguy hiểm:** Bất kỳ ai cũng có thể thay đổi state của object mà không kiểm soát, dẫn đến bugs khó lường (side effects).
-- **Fix:** Luôn ưu tiên `val`. Nếu cần thay đổi, dùng `private var` + hàm public để update.
-
-**2. Logic Nặng trong Primary Constructor**
-- **Tại sao nguy hiểm:** Khi class được load, constructor chạy ngay. Logic nặng (call API, heavy math) làm chậm startup và khó unit test.
-- **Fix:** Dùng `init` block hoặc Lazy Loading.
-
-**3. Secondary Constructor không gọi Primary**
-- **Tại sao nguy hiểm:** Viết lại code khởi tạo (boilerplate) và dễ quên logic chuẩn (như validation trong `init`).
-- **Fix:** Luôn gọi `this(...)` từ secondary constructor về primary.
-
-**4. Default Parameters trong Primary Constructor của Subclass**
-- **Tại sao nguy hiểm:** Kotlin yêu cầu tham số default phải là `val` hoặc `var`. Nếu không, subclass không thể Override đúng chuẩn OOP.
-- **Fix:** Cẩn thận khi kế thừa, ưu tiên Pass parameters явно.
-
---------------------------------
-SECTION 6: MASTER CHEAT SHEET
---------------------------------
-
-**Quick Rules:**
-1. **Class** là blueprint, **Object** là instance.
-2. Constructor Parameter không có `val`/`var` → chỉ dùng trong `init` hoặc `constructor`.
-3. Constructor Parameter có `val`/`var` → trở thành Property của Class.
-4. Dùng `init` cho logic startup.
-5. Dùng Default Parameters để减少 Constructor Overloading.
-
-**Decision Logic (If-Else):**
-- IF (Cần giữ giá trị cho Class) → THEN (Dùng `val`/`var`).
-- IF (Cần dùng 1 lần khi tạo) → THEN (Không dùng modifier).
-- IF (Có nhiều optional params) → THEN (Dùng Default Params + Named Args).
-- IF (Logic khởi tạo phức tạp) → THEN (Dùng `init` block).
-
-**Top 3 Things to Remember:**
-1. **KISS Principle:** Primary Constructor là tốt nhất trừ khi bạn cần secondary.
-2. **Immutability:** Dùng `val` làm default, chỉ dùng `var` khi thật cần thiết.
-3. **Validation:** Đặt trong `init` block để đảm bảo tính toàn vẹn dữ liệu (Data Integrity).
-
-<!-- CHUNK 11-20 -->
 
 # Developer Decision Guide: Classes & Objects (Lesson 3)
 
@@ -211,16 +134,6 @@ SECTION 6: MASTER CHEAT SHEET
 *   **Property (Thuộc tính):** Data stored in an object, defined by `val` (read-only) or `var` (mutable). Accessed via dot notation (`object.property`).
 *   **Custom Accessors (Truy cập tùy chỉnh):** Logic defined to override the default behavior of getting (`get()`) or setting (`set()`) a property's value.
 *   **Member Function (Phương thức thành viên):** A function defined inside a class that performs actions related to the object's state.
-
-### Key Mental Models
-*   **Construction Chain (Chuỗi khởi tạo):** A strict flow. When creating an object, the primary constructor runs first (including its properties and `init` blocks). Secondary constructors *must* delegate to the primary constructor (or another secondary that eventually delegates to primary). The primary constructor is the root of initialization.
-*   **Property vs. Field:** In Kotlin, a property is not just a variable; it is a complex structure that can contain logic (getters/setters). `field` is the backing field that actually stores the data, accessible only within accessors.
-*   **Encapsulation (Bao tộm):** Hide complexity. By using custom getters/setters, you can expose a simple API (e.g., `fullName`) while performing complex logic internally (e.g., splitting a string).
-
-### Why This Approach
-*   **Secondary Constructors vs. Default Arguments:** Kotlin's default arguments are more powerful than secondary constructors in most cases. Use secondary constructors primarily for dependency injection frameworks or strict API constraints.
-*   **Init Blocks vs. Constructor Body:** For Primary Constructors, `init` is the *only* body. It ensures that initialization logic is executed immediately after property initialization, guaranteeing the object is in a valid state before use.
-
 ---
 
 ## SECTION 2: DECISION TABLES
@@ -239,29 +152,6 @@ SECTION 6: MASTER CHEAT SHEET
 
 ---
 
-## SECTION 3: ARCHITECTURE & RELATIONSHIPS
-
-### Object Initialization Flow
-```text
-[Call Constructor] -> [Evaluate Constructor Arguments] -> [Assign Properties]
-     |
-     V
-[Run Primary Constructor Body (Init Blocks)] -> [Run Secondary Constructor Body]
-     |
-     V
-[Object Ready]
-```
-
-### Property Structure
-```text
-class User {
-    var name: String = ""
-      /             \
-     / (Getter/Setter) \
-    <------------------- [ Backing Field (field) ]
-     \                 /
-      \ (Logic Here)  /
-```
 
 ---
 
@@ -347,66 +237,8 @@ class BankAccount(val balance: Double) {
     }
 }
 ```
-
 ---
-
-## SECTION 5: ANTI-PATTERNS & WARNINGS
-
-1.  **Ignoring the `field` identifier in custom setters:**
-    *   **Danger:** If you write `set(value) { name = value }` inside the property `name`, you actually call the setter recursively (StackOverflowError).
-    *   **Fix:** Always use `field = value` to update the actual data storage inside accessors.
-
-2.  **Secondary constructors calling other secondaries in a loop:**
-    *   **Danger:** Every secondary constructor must eventually call the **Primary** constructor. Circular calls (`A -> B -> A`) result in compilation errors.
-    *   **Fix:** Ensure the "final" secondary constructor in the chain calls `this(...)` pointing to the primary.
-
-3.  **Primary Constructor with unused parameters:**
-    *   **Danger:** If you define a parameter in the primary constructor but don't use it in an `init` block or declare it as a property, it is useless and confusing.
-    *   **Fix:** Either use it in `init` or promote it to a property (add `val`/`var`).
-
----
-
-## SECTION 6: MASTER CHEAT SHEET
-
-### Quick Reference Rules
-1.  **Constructor:** Put simple parameters in `class MyType(val a: Int)`.
-2.  **Init:** Use `init { ... }` for logic that runs immediately.
-3.  **Secondary:** Use `constructor(...): this(...) { ... }` for alternative creation.
-4.  **Getters:** Use `val name get() = ...` for calculated values.
-5.  **Setters:** Use `var name = ... set(value) { field = value }` for validation.
-
-### Top 5 Things to Remember
-1.  **Delegation is Mandatory:** Secondary constructors *must* call `this(...)` (Primary).
-2.  **Primary is First:** `init` blocks run in the Primary constructor only.
-3.  **Back 'field' Up:** Inside `set()`, assign to `field`, not the property name.
-4.  **Dot Notation:** Use `.` to access properties (`obj.prop`).
-5.  **Computed Properties:** Use `get()` to avoid storing data that can be calculated.
-
-<!-- CHUNK 21-30 -->
-
-# DEVELOPER DECISION GUIDE: Classes & Objects (Lesson 3)
-
----
-
-## SECTION 1: CORE MENTAL MODEL
-
-### Core Definitions
-
-*   **Inheritance (Kế thừa)**: Cơ chế cho phép một class mới (subclass) mượn tính năng và trạng thái từ một class hiện có (superclass). Kotlin chỉ h hỗ trợ **kế thừa đơn cha mẹ** (single-parent class inheritance).
-*   **Interface (Giao diện)**: Một hợp đồng (contract) quy định các phương thức và thuộc tính mà class thực thi phải cung cấp. Một class có thể thực thi **nhiều interface**.
-*   **Open Keyword (Từ khóa mở)**: Chỉ thị rằng một class hoặc thành viên (method/property) có thể được kế thừa hoặc ghi đè. Theo mặc định, các class trong Kotlin là `final`.
-*   **Abstract Class (Lớp trừu tượng)**: Class không thể khởi tạo instancia (không thể `new`), dùng làm nền tảng cho các class con. Kết hợp giữa trạng thái (state) của class và tính trừu tượng của interface.
-
-### Key Mental Models
-
-1.  **"Mặc Định Là Cố Định"**: Hãy coi mọi class đều là `final`. Chỉ mở rộng khi cần thiết. Điều này buộc bạn phải suy nghĩ kỹ về thiết kế trước khi cho phép kế thừa.
-2.  **"Giao Diện Trươc, Cài Sau"**: Khi cần chia sẻ hành vi giữa các class không cùng dòng dõi (is-a relationship), hãy định nghĩa Interface. Khi cần chia sẻ **mã nguồn và trạng thái chung**, hãy dùng Abstract Class hoặc Inheritance.
-3.  **"Mở Rộng Không Đụng Chạm"**: Extension functions cho phép thêm chức năng mới vào class có sẵn mà không cần sửa đổi source code gốc hoặc tạo class con.
-
----
-
 ## SECTION 2: DECISION TABLES
-
 ### Table 1: Inheritance (Class) vs Interface
 | Tình huống sử dụng | Nên dùng gì | Tại sao | Sai lầm thường gặp |
 | :--- | :--- | :--- | :--- |
@@ -535,26 +367,6 @@ class LoginController : BaseController() {
     }
 }
 ```
-
----
-
-## SECTION 5: ANTI-PATTERNS & WARNINGS
-
-### 1. Lạm dụng Inheritance (Inheritance Abuse)
-*   **Biểu hiện:** Dùng kế thừa khi chỉ muốn chia sẻ một hàm utility nhỏ hoặc khi class cha quá lớn.
-*   **Nguy hiểm:** Tạo ra **God Object** (Class cha biết tất cả). Nếu sửa class cha, có thể làm vỡ hàng trăm class con. Cấu trúc cây quá sâu dẫn đến code khó hiểu (Fragile Base Class Problem).
-*   **Đúng là:** Dùng **Composition** hoặc **Extension Functions** thay vì kế thừa class.
-
-### 2. Quên `override` trong Interface/Abstract Class
-*   **Biểu hiện:** Implement class con nhưng không gõ `override` cho phương thức từ interface hoặc abstract class.
-*   **Nguy hiểm:** Compiler sẽ hiểu đó là một phương thức mới hoàn toàn, không liên quan đến hợp đồng cũ. Logic cha sẽ không bao giờ được gọi.
-*   **Fix:** Luôn dùng `override` (Kotlin bắt buộc để đảm bảo bạn đang sửa đúng cái cần sửa).
-
-### 3. Tránh dùng `open` một cách bừa bãi
-*   **Biểu hiện:** Đánh dấu `open` cho mọi class để "cho chắc chắn".
-*   **Nguy hiểm:** Mở rộng lớp phủ (attack surface) của code. Người khác có thể kế thừa và thay đổi logic không mong muốn, gây khó khăn khi bảo trì.
-*   **Quy tắc:** Chỉ `open` khi bạn **thiết kế rõ ràng** cho việc kế thừa.
-
 ---
 
 ## SECTION 6: MASTER CHEAT SHEET
@@ -584,9 +396,6 @@ class LoginController : BaseController() {
 **Interface (Giao diện):** Hợp đồng kỹ thuật định nghĩa hành vi mà lớp khác phải triển khai.
 **Extension Function (Hàm mở rộng):** Thêm phương thức vào lớp hiện có mà không cần sửa đổi mã nguồn gốc.
 **Data Class (Lớp dữ liệu):** Lớp đặc biệt tự sinh mã để quản lý dữ liệu (toString, equals, hashCode, copy).
-
-**Why this approach is better:**
-Thay vì kế thừa đa lớp (không thể trong Kotlin), việc kết hợp `abstract class` (trùng lặp logic cơ bản) và `interface` (đa năng, linh hoạt) tạo ra hệ thống dễ bảo trì. `Extension functions` ngăn cách logic phụ trợ khỏi lớp gốc, tránh vi phạm nguyên tắc Single Responsibility.
 
 ```kotlin
 // 1. Abstract Class: Enforces structure
@@ -763,23 +572,6 @@ fun main() {
 ```
 
 ---
-
-## SECTION 5: ANTI-PATTERNS & WARNINGS
-
-1. **Creating Data Classes with Logic:** Dùng `data class` để chứa business logic là sai. Nó sinh ra để chứa dữ liệu thuần túy.
-   *   *Why:* `copy()`, `equals()` sẽ không hoạt động đúng nếu logic thay đổi internal state quá nhiều. Vi phạm nguyên tắc Single Responsibility.
-
-2. **Inheritance Abuse (Lạm dụng Kế thừa):** Kế thừa lớp cha chỉ để reuse code mà không có quan hệ "Is-A" thực sự.
-   *   *Why:* Tạo ra sự ràng buộc chặt chẽ (tight coupling). Dùng `Composition` hoặc `Interface` + `Extension Functions` thay thế.
-
-3. **Extension Functions accessing private members:** Cố gắng truy cập biến private của lớp bên trong extension function.
-   *   *Why:* Extension functions chỉ là hàm static. Chúng không thể truy cập `private` hoặc `protected` của lớp đó.
-
-4. **Interface with State:** Khai báo biến biến mutable trong Interface.
-   *   *Why:* Interface không nên chứa state. Chúng nên định nghĩa hành vi. State nên ở trong `class` hoặc `abstract class`.
-
----
-
 ## SECTION 6: MASTER CHEAT SHEET
 
 **Quick Decision Logic (If-Else):**
@@ -790,19 +582,6 @@ fun main() {
 *   **IF** you need to add helper methods to `Int`, `String`, or library classes -> **Extension Function**.
 *   **IF** you need to inherit multiple types -> **Use Interfaces** (Kotlin allows 1 Class, N Interfaces).
 
-**Top 5 Things to Remember:**
-1.  **1 Class, N Interfaces:** You can extend only one class (abstract or open), but implement unlimited interfaces.
-2.  **Data Class is Final:** Data classes cannot be inherited (unless `open` is explicitly added, but usually avoid).
-3.  **Extensions are "Fake" Methods:** They are compiled to static functions (e.g., `ExtensionsKt.isOdd(myInt)`). They cannot access private members.
-4.  **Abstract vs Open:** Abstract classes are implicitly `open` for inheritance, but their members may be `abstract` (must override) or concrete.
-5.  **Pair is a Data Class:** `Pair(A, B)` is just a predefined data class. Use it for quick returns, but name your own data classes for clarity in public APIs.
-
-<!-- CHUNK 41-50 -->
-
-# DEVELOPER DECISION GUIDE: Classes and Objects (Lesson 3)
-
---------------------------------
-SECTION 1: CORE MENTAL MODEL
 --------------------------------
 **Core Definitions**
 - **Pair (Cặp dữ liệu)**: Cấu trúc dữ liệu chứa chính xác 2 giá trị, có thể thuộc 2 kiểu dữ liệu khác nhau. Thường dùng để biểu diễn một cặp ý nghĩa (ví dụ: Key-Value).
@@ -820,30 +599,6 @@ SECTION 1: CORE MENTAL MODEL
 - **Pair/Triple**: Tránh tạo quá nhiều data class nhỏ cho việc tạm thời, giúp code gọn và đọc được ngay ý nghĩa (dùng infix `to`).
 - **Enum**: Phòng ngừa lỗi biên dịch (compile-time safety). Tránh việc gõ sai chuỗi string hoặc số enum.
 - **Object/Companion**: Tiết kiệm bộ nhớ (chỉ 1 instance), tránh phải khởi tạo đối tượng lặp lại.
-
---------------------------------
-SECTION 2: DECISION TABLES
---------------------------------
-
-### Table 1: Pair/Triple vs Data Class
-| Tình huống sử dụng | Nên dùng gì | Tại sao | Sai lầm thường gặp |
-| :--- | :--- | :--- | :--- |
-| Trả về 2 giá trị tạm thời từ hàm (ví dụ: tọa độ x,y) | **Pair** hoặc **to** infix | Pair (Cặp dữ liệu) là cấu trúc không immutable, lightweight, không cần khai báo trước. | Tạo một Data Class chỉ để dùng 1 lần duy nhất, làm code rườm rà. |
-| Truy cập giá trị qua tên biến rõ ràng (ví dụ: `result.name`) | **Data Class** | Data Class tự sinh getter, có tên thuộcmeaningful. Pair dùng `.first`, `.second` gây khó đọc. | Lạm dụng Pair cho logic phức tạp, dẫn đến code khó bảo trì khi requirements thay đổi. |
-| Định nghĩa các cặp Key-Value cho Map | **Infix `to`** | `1 to "A"` tạo Pair cực kỳ ngắn gọn và đọc được như câu tự nhiên. | Dùng `Pair(1, "A")` dài dòng không cần thiết. |
-
-### Table 2: Enum Class vs Constant (const val)
-| Tình huống sử dụng | Nên dùng gì | Tại sao | Sai lầm thường gặp |
-| :--- | :--- | :--- | :--- |
-| Một tập hợp giá trị có liên quan logic với nhau (ví dụ: Status) | **Enum Class** | Enum (Lớp liệt kê) có thể chứa property và method, đảm bảo chỉ nhận đúng các giá trị định nghĩa. | Dùng `const val` hoặc `String` cứng, dẫn đến lỗi runtime khi truyền giá trị không tồn tại. |
-| Chỉ cần hằng số số nguyên/văn bản đơn giản, độc lập | **const val** | Đơn giản, không cần overhead của object/class. | Viết Enum chỉ để chứa 1 giá trị duy nhất, gây thừa thãi. |
-
-### Table 3: Object vs Companion Object vs Class
-| Tình huống sử dụng | Nên dùng gì | Tại sao | Sai lầm thường gặp |
-| :--- | :--- | :--- | :--- |
-| Cung cấp utility function không cần state (ví dụ: Calculator) | **Object** | Object (Đối tượng) là Singleton, truy cập trực tiếp qua tên, không cần khởi tạo instance. | Dùng Class thông thường rồi phải tạo instance mới dùng được, lãng phí. |
-| Khai báo hằng số hoặc factory method thuộc về Class (ví dụ: `MyClass.create()`) | **Companion Object** | Companion Object (Đối tượng đi kèm) cho phép truy cập qua tên class, tách biệt logic static với instance. | Đặt variable/function ở level file (top-level) gây rối namespace, khó tìm kiếm. |
-| Cần nhiều instances có state riêng biệt | **Class** | Class dùng để tạo nhiều object độc lập về dữ liệu. | Dùng Object (Singleton) cho các class cần nhiều instances, gây lỗi logic shared state. |
 
 --------------------------------
 SECTION 3: ARCHITECTURE & RELATIONSHIPS
@@ -976,26 +731,6 @@ fun main() {
 ```
 
 --------------------------------
-SECTION 5: ANTI-PATTERNS & WARNINGS
---------------------------------
-
-1. **Pair Abuse (Lạm dụng Pair)**
-   - **Tại sao nguy hiểm:** Khi một `Pair` chứa quá nhiều logic hoặc được truyền đi khắp nơi, việc truy cập `.first` và `.second` sẽ làm code cực kỳ khó hiểu và dễ nhầm lẫn thứ tự.
-   - **Fix:** Nếu giữ Pair quá 10 dòng code hoặc dùng > 2 lần, hãy tạo `data class`.
-
-2. **Enum bloat (Enum thừa)**
-   - **Tại sao nguy hiểm:** Tạo một `enum class` chỉ với 1 hằng số hoặc dùng enum để thay thế cho `boolean` (True/False) là không cần thiết.
-   - **Fix:** Dùng `Boolean` cho True/False. Dùng `const val` cho hằng số đơn lẻ.
-
-3. **Companion Object Chaos (Trộn lẫn logic)**
-   - **Tại sao nguy hiểm:** Đặt cả logic instance (phải có `this`) vào Companion Object. Companion chỉ nên dùng cho logic **không** cần state của instance.
-   - **Fix:** Logic dùng state của object phải là method của class (không có `companion`).
-
-4. **Truy cập Object qua Instance**
-   - **Tại sao nguy hiểm:** `val obj = Calculator` rồi gọi `obj.add()`. Sai bản chất của Singleton. Object là static access.
-   - **Fix:** Truy cập trực tiếp: `Calculator.add()`.
-
---------------------------------
 SECTION 6: MASTER CHEAT SHEET
 --------------------------------
 
@@ -1017,11 +752,6 @@ SECTION 6: MASTER CHEAT SHEET
 2. **Enum is Type-Safe**: Tránh lỗi runtime.
 3. **Object là Singleton**: Không dùng `new`.
 
-<!-- CHUNK 51-56 -->
-
-# DEVELOPER DECISION GUIDE: Classes and Objects (Lesson 3)
-
-## SECTION 1: CORE MENTAL MODEL
 
 ### **Package (Gói)**
 Cơ chế để tổ chức code thành các thư mục logic, tránh xung đột tên gọi (namespace). Tên thường viết thường, phân cấp bằng dấu chấm.
@@ -1034,14 +764,6 @@ class Player {
     // Code here thuộc về package org.example.game
 }
 ```
-
-### **Visibility Modifiers (Bộ điều chế hiển thị)**
-Công cụ kiểm soát quyền truy cập của các phần tử (class, function, property) từ bên ngoài.
-
-*   **`public` (Mặc định):** Mọi nơi đều thấy.
-*   **`private`:** Chỉ class/file đó thấy.
-*   **`protected`:** Class đó và các class con (subclasses) thấy.
-
 ### **Hierarchy (Mô hình cấp bậc)**
 Cách tổ chức các class từ tổng quát đến chi tiết. Tránh lặp lại logic bằng cách kế thừa thuộc tính/phương thức từ cha.
 
@@ -1061,25 +783,6 @@ class Moped : Vehicle() // Con của Vehicle
 | Thuộc tính/Method cần truy cập bởi class con (subclass) | `protected` | **Extensibility (Mở rộng):** Cho phép con kế thừa và tùy biến khi cần. | Dùng `private` chặn luôn con hoặc `public` lộ chi tiết implementation. |
 | API cho các phần khác của app | `public` | **Interface (Giao diện):** Cam kết giao tiếp giữa các module. |滥用 `public` cho mọi thứ, phá vỡ tính modular. |
 
-## SECTION 3: ARCHITACHURE & RELATIONSHIPS
-
-### Structure Hierarchy
-Dạng cây thư mục thể hiện cấu trúc package và class.
-
-```
-org.example.vehicle
-├── Vehicle (Base Class)
-│   └── [Properties: speed, fuel]
-│   └── [Methods: drive()]
-│
-├── Moped (Subclass)
-│   ├── Moped50cc
-│   └── Moped100cc
-│
-└── Car (Subclass)
-    ├── Sedan
-    └── Hatchback
-```
 
 ## SECTION 4: CODE PATTERNS (READY TO USE)
 
@@ -1121,36 +824,3 @@ fun handleResult(result: NetworkResult) {
     }
 }
 ```
-
-## SECTION 5: ANTI-PATTERNS & WARNINGS
-
-1.  **Thiếu `open` keyword:**
-    *   **Lỗi:** `class Child : Parent()` (nếu `Parent` không có `open`).
-    *   **Nguy hiểm:** Kotlin mặc định `final` (không cho kế thừa). Code sẽ báo lỗi compile. Luôn nhớ thêm `open` nếu định cho phép class con kế thừa.
-
-2.  **滥用 `public` mặc định:**
-    *   **Lỗi:** Để mọi thứ là `public` vì lười khai báo.
-    *   **Nguy hiểm:** Phá vỡ encapsulation. Class bên ngoài phụ thuộc vào implementation nội bộ, khiến việc refactor (sửa code) sau này cực kỳ khó khăn và dễ gây lỗi.
-
-3.  **Quên package khai báo:**
-    *   **Lỗi:** File code không có dòng `package ...`.
-    *   **Nguy hiểm:** File thuộc về "default package", gây khó khăn trong việc import và quản lý project lớn. Có thể gây xung đột tên.
-
-## SECTION 6: MASTER CHEAT SHEET
-
-### Decision Logic (If-Else)
-*   **Nếu bạn cần một thực thể duy nhất (Singleton):** Dùng `object`.
-*   **Nếu bạn cần cấu trúc dữ liệu đơn giản (POJO):** Dùng `data class`.
-*   **Nếu bạn cần định nghĩa hành vi để class khác kế thừa:** Dùng `open class`.
-*   **Nếu bạn cần định nghĩa giao thức (contract) mà không cần implementation:** Dùng `interface`.
-*   **Nếu bạn cần xử lý logic dựa trên loại đối tượng:** Dùng `sealed class`.
-
-### Top 5 Things to Remember
-1.  **Package:** Khai báo đầu file, viết thường, phân cấp bằng chấm (`.`).
-2.  **Visibility:**
-    *   `public`: Toàn cầu (Mặc định).
-    *   `private`: Nội bộ file/class.
-    *   `protected`: Nội bộ + Class con.
-3.  **Inheritance:** Class cha cần `open`, class con dùng `:`.
-4.  **Data Class:** Tự động sinh `toString()`, `equals()`, `hashCode()`.
-5.  **Object:** Là Singleton (chỉ có 1 instance duy nhất trong app).
