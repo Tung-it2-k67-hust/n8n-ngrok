@@ -1,20 +1,5 @@
 # DEVELOPER DECISION GUIDE: Lesson 2 Functions.pdf
-
-
-# DEVELOPER DECISION GUIDE: Functions
-
-
-## SECTION 2: DECISION TABLES
-
-| Use case (Tình huống sử dụng) | Should use (Nên dùng gì) | Why (Tại sao) | Common mistake (Sai lầm thường gặp) |
-| :--- | :--- | :--- | :--- |
-| **Run code once** | `main()` function | **Entry Point (Điểm bắt đầu)**: JVM cần `main()` để bắt đầu execution. | Quên khai báo `fun main()` hoặc viết sai cú pháp `main(String[] args)`. |
-| **Reuse logic多次** | Custom Function (`fun name()`) | **DRY Principle (Nguyên tắc lặp lại)**: Tránh duplication, easier maintenance. | Viết code lặp lại (copy-paste) thay vì tạo hàm. |
-| **Access runtime data** | Command Line Arguments | **Dynamic Input (Đầu vào động)**: Cho phép chương trình linh hoạt mà không sửa code. | Assuming args exist without handling index out of bounds (`args[0]`). |
-| **Format string output** | String Template (`${}`) | **Readability (Tính dễ đọc)**: Dễ nhìn thấy cấu trúc chuỗi hơn concatenation (`+`). | Quên `$` hoặc dùng `"{args[0]}"` thay vì `"${args[0]}"`. |
-
 ## SECTION 3: ARCHITECTURE & RELATIONSHIPS
-
 ### Hierarchy of Execution
 ```text
 [Program Process]
@@ -75,23 +60,8 @@ fun main() {
     printUserScore("Dev1", 100)
 }
 ```
-
-
-## SECTION 6: MASTER CHEAT SHEET
-
-### Quick Reference Rules
-1. **File header**: `fun main(args: Array<String>) { ... }`
-2. **Variable inside string**: Use `${variable}`.
-3. **Check args**: `if (args.isNotEmpty()) { ... }`
-4. **Get arg**: `args[0]` (index 0 based).
-5. **Print**: `println("Text")`.
-
-<!-- CHUNK 11-20 -->
-
 ## SECTION 1: CORE MENTAL MODEL
-
 ### Core Concepts (Tư duy cốt lõi)
-
 **1. Everything is an Expression (Mọi thứ là biểu thức)**
 - Hầu hết mọi thứ trong Kotlin trả về giá trị, kể cả `if/else`.
 - Kết quả của một khối mã là giá trị của biểu thức cuối cùng.
@@ -115,16 +85,7 @@ fun logMessage(msg: String) {
 }
 ```
 ---
-
 ## SECTION 2: DECISION TABLES
-
-### Table 1: Function Return Types
-
-| Tình huống sử dụng | Nên dùng gì | Tại sao (Why) | Sai lầm thường gặp |
-| :--- | :--- | :--- | :--- |
-| Hàm thực hiện việc in/log, không cần giá trị trả về | Không khai báo return type (dùng `Unit` ngầm) | **Default Behavior**: Tránh dư thừa mã. Codebase clean. | Khai báo `Unit` everywhere (rất dài dòng). |
-| Cần trả về kết quả tính toán | Khai báo rõ kiểu trả về (vd: `Int`, `String`) | **Type Safety**: Tránh lỗi khi gọi hàm. | Để trống return type khi cần trả về giá trị -> Lỗi biên dịch. |
-
 ### Table 2: Parameters & Arguments
 
 | Tình huống sử dụng | Nên dùng gì | Tại sao (Why) | Sai lầm thường gặp |
@@ -189,16 +150,6 @@ createNotification("Sập nguồn", "CRITICAL", true)
 3. **Default Rule**: Dùng `param: Type = value` thay vì viết nhiều hàm.
 4. **Call Rule**: Dùng `name = value` khi tham số > 2 hoặc dễ nhầm lẫn.
 
-### Top 3 Things to Remember (Top 3 cần nhớ)
-1. **Kotlin là Expression-Oriented**: Gọi hàm cũng là expression, nó trả về giá trị.
-2. **Default Parameters là King**: Giúp code linh hoạt, dễ bảo trì.
-3. **Unit là Object**: Đừng viết `fun a(): Unit = {}` nếu không cần thiết.
-
-<!-- CHUNK 21-30 -->
-
-# DEVELOPER DECISION GUIDE: Functions
-
-## SECTION 1: CORE MENTAL MODEL
 
 **First-Class Function (Hàm cấp 1)**
 Khả năng của hàm trong Kotlin được treated như một biến dữ liệu thông thường (lưu trữ, truyền làm tham số, trả về).
@@ -400,10 +351,6 @@ fun main() {
 
 ## SECTION 5: ANTI-PATTERNS & WARNINGS
 
-1.  **Overusing Positional Arguments in Complex Functions**
-    *   **Danger:** Gây ra lỗi logic khó phát hiện. Nếu developer đổi chỗ 2 tham số cùng type (ví dụ `true/false`), compiler không báo lỗi nhưng program chạy sai.
-    *   **Solution:** Dùng **Named Arguments** hoặc tách hàm nhỏ hơn.
-
 2.  **Optional Parameters Before Required Parameters**
     *   **Danger:** Violates logic đọc code. Caller bắt buộc phải pass arguments cho các parameter đầu tiên dù nó là optional.
     *   **Code Sai:**
@@ -432,32 +379,6 @@ fun main() {
 
 ### Key Mental Model
 Think of functions as "behavior variables." Instead of writing specific logic inside a function (hardcoded), you pass the *logic* itself as an argument. This makes your API generic.
-
-**Why is this better?**
-*   **Standard Library:** Kotlin uses this for almost everything (`filter`, `map`, `repeat`). If you don't master it, you can't read standard Kotlin.
-*   **Flexibility:** You write one function that handles the structure (e.g., connecting to a DB), and the user provides the specific action (e.g., processing the data).
-
-```kotlin
-// 1. Define the HOF signature
-fun processUser(name: String, action: (String) -> Unit) {
-    // Logic here...
-    action(name) 
-}
-
-// 2. Usage: Passing logic dynamically
-fun main() {
-    // Case A: Lambda (Inline logic)
-    processUser("Alice") { user -> println("Processing $user") }
-
-    // Case B: Function Reference (Reusable logic)
-    processUser("Bob", ::sendEmail)
-}
-
-fun sendEmail(user: String) {
-    println("Email sent to $user")
-}
-```
-
 ---
 
 ## SECTION 2: DECISION TABLES
@@ -551,30 +472,7 @@ fun main() {
 fun executeCommand(cmd: String) {
     println("Executing: $cmd")
 }
-```
 
-### Pattern 4: Lazy Evaluation (Sequence)
-**When to use:** Dealing with huge datasets or chained operations to save memory.
-
-```kotlin
-fun main() {
-    val range = 1..1_000_000
-    
-    // Eager (Normal List) - Creates intermediate lists immediately
-    val eager = range.toList()
-        .filter { it % 2 == 0 }
-        .map { it * 2 }
-        .first() 
-
-    // Lazy (Sequence) - Processes items one by one, stops at first match
-    val lazy = range.asSequence()
-        .filter { it % 2 == 0 }
-        .map { it * 2 }
-        .first() 
-    
-    println(lazy)
-}
-```
 
 ---
 
@@ -674,42 +572,6 @@ val lazy = listOf(1, 2, 3, 4, 5)
 | **Nhân đôi giá trị (Element-wise)** | `map { it * 2 }` | Duyệt qua từng phần tử và apply transform. | Dùng `forEach` và thêm vào mutable list mới (lằng nhằng, dễ lỗi). |
 | **Làm phẳng list con (Nested List)** | `flatten()` | Trả về một list duy nhất chứa mọi phần tử. | Dùng `flatMap` với logic trả về list rỗng thay vì `flatten()` cho cấu trúc đơn giản. |
 
-## SECTION 3: ARCHITECTURE & RELATIONSHIPS
-
-```text
-DATA FLOW: Eager vs Lazy Pipeline
-
-[INPUT] -> [TYPE] -> [OP 1] -> [OP 2] -> [OUTPUT]
-
-1. EAGER (Standard List)
-   List(1, 2, 3)
-      |
-   Filter { it > 1 }
-      |
-   List(2, 3)  <-- [Tạo List mới ở đây]
-      |
-   Map { it * 2 }
-      |
-   List(4, 6)  <-- [Tạo List mới ở đây]
-   KẾT QUẢ: List(4, 6)
-
-2. LAZY (Sequence)
-   List(1, 2, 3)
-      |
-   asSequence()
-      |
-   Sequence (Chưa xử lý)
-      |
-   Filter { it > 1 } (Chỉ lưu rule)
-      |
-   Map { it * 2 } (Chỉ lưu rule)
-      |
-   toList() / sum() / find()
-      |
-   Duyệt: 1 (bỏ) -> 2 (lọc -> nhân -> 4) -> 3 (lọc -> nhân -> 6)
-   KẾT QUẢ: List(4, 6) hoặc Int (tùy terminal op)
-```
-
 ## SECTION 4: CODE PATTERNS (READY TO USE)
 
 ### Pattern 1: Lazy Filtering Chain
@@ -741,13 +603,7 @@ val result = nestedSets
     .map { it * 2 }            // [2,4,6,8,10]
     .sorted()                  // Sắp xếp
 ```
-
 ## SECTION 5: ANTI-PATTERNS & WARNINGS
-
-1.  **Mixing Collection & Sequence without `toList()`**
-    *   **Danger**: Gây lỗi biên dịch hoặc logic không mong muốn. Sequence chỉ trả về `Sequence` object, không phải `List`.
-    *   **Vietnamese**: Trả về `Sequence` cho Adapter hoặc API là sai quy chuẩn. Luôn kết thúc bằng `toList()` nếu cần collection thực.
-
 2.  **Dùng `forEach` thay cho `map`**
     *   **Code Sai**:
         ```kotlin
